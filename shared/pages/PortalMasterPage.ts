@@ -1,0 +1,195 @@
+import { Page, Locator, expect } from '@playwright/test';
+
+/**
+ * Page Object - Master Data (Role / Menu / User) pada Portal BOT.
+ * Asumsi: session sudah ada (storageState dari auth.setup.ts), jadi tidak login ulang.
+ */
+export class PortalMasterPage {
+  readonly page: Page;
+  readonly roleHeading: Locator;
+  readonly menuHeading: Locator;
+  readonly userHeading: Locator;
+  readonly addRoleButton: Locator;
+  readonly addMenuButton: Locator;
+  readonly addUserButton: Locator;
+  readonly searchInput: Locator;
+  readonly roleTable: Locator;
+  readonly roleRows: Locator;
+  readonly simpanButton: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.roleHeading = page.getByRole('heading', { name: 'Role' });
+    this.menuHeading = page.getByRole('heading', { name: 'Menu' });
+    this.userHeading = page.getByRole('heading', { name: 'Daftar pengguna' });
+    this.addRoleButton = page.getByRole('button', { name: 'Role', exact: true }).first();
+    this.addMenuButton = page.getByRole('button', { name: 'Menu', exact: true }).first();
+    this.addUserButton = page.getByRole('button', { name: 'Tambah Pengguna', exact: true }).first();
+    this.searchInput = page.getByPlaceholder('Cari..');
+    this.roleTable = page.locator('table');
+    this.roleRows = page.locator('tbody tr');
+    this.simpanButton = page.getByRole('button', { name: 'Simpan' });
+  }
+
+  async openRolePage() {
+    await this.page.goto('/master/role');
+    await expect(this.roleHeading).toBeVisible({ timeout: 15000 });
+    await expect(this.addRoleButton).toBeVisible({ timeout: 15000 });
+    await this.page.waitForLoadState('networkidle').catch(() => {});
+  }
+
+  async openMenuPage() {
+    await this.page.goto('/master/menu');
+    await expect(this.menuHeading).toBeVisible({ timeout: 15000 });
+    await expect(this.addMenuButton).toBeVisible({ timeout: 15000 });
+  }
+
+  async openUserPage() {
+    await this.page.goto('/master/user');
+    await expect(this.userHeading).toBeVisible({ timeout: 15000 });
+    await expect(this.addUserButton).toBeVisible({ timeout: 15000 });
+  }
+
+  async openAddRoleForm() {
+    await this.addRoleButton.click();
+    await expect(this.page.getByRole('heading', { name: 'Tambah Role' })).toBeVisible({ timeout: 10000 });
+  }
+
+  async openAddMenuForm() {
+    await this.addMenuButton.click();
+    await expect(this.page.getByRole('heading', { name: 'Tambah Menu' })).toBeVisible({ timeout: 10000 });
+  }
+
+  async openAddUserForm() {
+    await this.addUserButton.click();
+    await expect(this.page.getByRole('heading', { name: 'Tambah Pengguna' })).toBeVisible({ timeout: 10000 });
+  }
+
+  async fillRoleForm({ code, name, description }: { code: string; name: string; description: string }) {
+    await this.page.getByPlaceholder('Masukan kode').fill(code);
+    await this.page.getByPlaceholder('Name', { exact: true }).fill(name);
+    await this.page.getByPlaceholder('Description').fill(description);
+  }
+
+  async fillUserForm({
+    fullname,
+    email,
+    phoneNumber,
+    password,
+  }: {
+    fullname: string;
+    email: string;
+    phoneNumber: string;
+    password: string;
+  }) {
+    await this.page.getByPlaceholder('Masukan nama lengkap').fill(fullname);
+    await this.page.getByPlaceholder('Masukan email').fill(email);
+    await this.page.getByPlaceholder('Masukan Nomor Handphone').fill(phoneNumber);
+    await this.page.getByPlaceholder('Masukan kata sandi kamu').fill(password);
+  }
+
+  /** Set status aktif (switch ON). */
+  async setStatusActive() {
+    const sw = this.page.getByRole('main').getByRole('switch');
+    if ((await sw.getAttribute('data-state')) !== 'checked') {
+      await sw.click({ force: true });
+    }
+  }
+
+  /** Beri akses SEMUA menu: buka grup Dashboard/Master Data/Aplikasi lalu centang semua checkbox. */
+  async grantAllAccess() {
+    const openRegions = () =>
+      this.page.evaluate(() => document.querySelectorAll('main [data-state="open"]').length);
+
+    for (const group of ['Dashboard', 'Master Data', 'Aplikasi']) {
+      const header = this.page.getByRole('main').getByRole('button', { name: group, exact: true }).first();
+      if (!(await header.isVisible())) continue;
+      const before = await openRegions();
+      await header.click();
+      try {
+        await this.page.waitForFunction(
+          (prev) => document.querySelectorAll('main [data-state="open"]').length > prev,
+          before,
+          { timeout: 10000 },
+        );
+      } catch {
+        await header.click();
+        await this.page.waitForTimeout(1500);
+      }
+    }
+
+    const cbs = this.page.getByRole('main').getByRole('checkbox');
+    await cbs.first().waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+    for (let pass = 0; pass < 4; pass++) {
+      for (let i = 0; i < (await cbs.count()); i++) {
+        const cb = cbs.nth(i);
+        if ((await cb.getAttribute('data-state')) !== 'checked') {
+          await cb.click({ force: true }).catch(() => {});
+        }
+      }
+      await this.page.waitForTimeout(300);
+    }
+  }
+
+  /** Pilih aplikasi dari listbox (multi-pilih), mis. BOT ICONNET + sub-apps. */
+  async selectApplications(apps: string[]) {
+    const trigger = this.page
+      .getByRole('main')
+      .locator('label', { hasText: 'Aplikasi' })
+      .locator('xpath=../button');
+    await trigger.first().click();
+    for (const app of apps) {
+      const opt = this.page.getByRole('option', { name: app, exact: true });
+      await opt.click({ force: true });
+    }
+    await this.page.keyboard.press('Escape');
+  }
+
+  /** Pilih role dari dropdown "Pilih Role". */
+  async selectRole(roleName: string) {
+    await this.page.getByRole('button', { name: 'Pilih Role' }).click();
+    await this.page.getByRole('option', { name: roleName }).click();
+  }
+
+  async save() {
+    await this.simpanButton.click();
+  }
+
+  /** Cari role di tabel. */
+  async search(keyword: string) {
+    await this.searchInput.fill(keyword);
+    await this.searchInput.press('Enter');
+  }
+
+  /** Hapus role jika sudah ada (biar test bisa di-repeat). */
+  async deleteRoleIfExists(code: string) {
+    await this.search(code);
+    const row = this.page.getByRole('row', { name: new RegExp(code) });
+    if (await row.count()) {
+      await row.getByRole('button', { name: 'Open menu' }).click();
+      await this.page.getByRole('menuitem', { name: 'Hapus' }).click();
+      await this.confirmDelete();
+      await expect(this.page.getByRole('row', { name: new RegExp(code) })).toHaveCount(0, { timeout: 10000 }).catch(() => {});
+    }
+  }
+
+  /** Hapus user jika sudah ada (biar test bisa di-repeat). */
+  async deleteUserIfExists(email: string) {
+    await this.search(email);
+    const row = this.page.getByRole('row', { name: new RegExp(email) });
+    if (await row.count()) {
+      await row.getByRole('button', { name: 'Open menu' }).click();
+      await this.page.getByRole('menuitem', { name: 'Hapus' }).click();
+      await this.confirmDelete();
+      await expect(this.page.getByRole('row', { name: new RegExp(email) })).toHaveCount(0, { timeout: 10000 }).catch(() => {});
+    }
+  }
+
+  private async confirmDelete() {
+    const confirm = this.page.getByRole('button', { name: /Lanjutkan|Ya|Konfirmasi|Delete|Hapus/i });
+    if (await confirm.count()) {
+      await confirm.first().click();
+      await expect(this.page.locator('[role="alertdialog"]')).toHaveCount(0, { timeout: 10000 }).catch(() => {});
+    }
+  }
+}

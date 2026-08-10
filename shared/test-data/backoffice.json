@@ -136,11 +136,17 @@
     "close_text": "Close"
   },
   "login": {
-    "secure_message": "You logged into a secure area!",
+    "welcome_title": "Selamat Datang di Portal BOT!",
+    "captcha_title": "Verifikasi Captcha",
+    "captcha_prompt": "Lakukan perintah captcha dengan benar",
     "invalid_password": "passwordSalah123",
-    "invalid_password_message": "Your password is invalid!",
-    "username_required_message": "Your username is invalid!",
-    "password_required_message": "Your password is invalid!",
-    "logout_url": "/logout"
+    "invalid_password_message": "Email atau password salah",
+    "email_required_message": "Email wajib diisi",
+    "password_required_message": "Kata sandi wajib diisi",
+    "logout_url": "/logout",
+    "otp_dummy": "000000",
+    "dashboard_url_pattern": "dashboard",
+    "menu_endpoint": "/api/v1/dashboard/list-menu",
+    "app_endpoint": "/api/v1/dashboard/list-app"
   }
 }

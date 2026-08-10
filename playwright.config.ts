@@ -17,7 +17,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0, // retry max 1x, hanya di CI (lihat kebijakan maintenance)
-  workers: process.env.CI ? 2 : undefined,
+  // workers: 1 -> portal playground menolak login OTP jika ada 2+ login bersamaan (terbukti flaky).
+  workers: 1,
   reporter: [
     ['html', { open: 'never' }],
     ['list'],
@@ -38,6 +39,14 @@ export default defineConfig({
 
   projects: [
     {
+      name: 'setup',
+      testDir: '.',
+      testMatch: /auth\.setup\.ts/,
+      use: {
+        baseURL: config.backoffice_base_url,
+      },
+    },
+    {
       name: 'api',
       testDir: './api-tests',
       use: {
@@ -47,9 +56,11 @@ export default defineConfig({
     {
       name: 'backoffice',
       testDir: './backoffice-tests',
+      dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
         baseURL: config.backoffice_base_url,
+        storageState: '.auth/portal.json',
       },
     },
     {

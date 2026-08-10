@@ -11,8 +11,8 @@
   },
   "backoffice": {
     "admin": {
-      "username": "tomsmith",
-      "password": "SuperSecretPassword!"
+      "email": "rogo@yopmail.com",
+      "password": "Password@123"
     }
   },
   "api": {
