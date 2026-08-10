@@ -6,6 +6,9 @@ import backofficeData from '../../shared/test-data/backoffice.json';
 const admin = usersData.backoffice.admin;
 const data = backofficeData.login;
 
+// Sama seperti login.spec.ts: test ini menguji landing & login,
+// jadi harus mulai dari session kosong (tanpa storageState).
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe.configure({ mode: 'serial' });
 

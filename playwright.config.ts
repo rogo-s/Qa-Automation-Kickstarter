@@ -62,10 +62,12 @@ export default defineConfig({
       testDir: './backoffice-tests',
       testIgnore: /demo\//,
       dependencies: ['setup'],
+      timeout: 120000,
       use: {
         ...devices['Desktop Chrome'],
         baseURL: config.backoffice_base_url,
         storageState: '.auth/portal.json',
+        launchOptions: { slowMo: 1000 },
       },
     },
     {

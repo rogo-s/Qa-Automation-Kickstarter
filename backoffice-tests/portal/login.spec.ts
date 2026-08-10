@@ -11,6 +11,10 @@ import backofficeData from '../../shared/test-data/backoffice.json';
 const admin = usersData.backoffice.admin;
 const data = backofficeData.login;
 
+// Spesifikasi ini menguji alur login, harus mulai dari session kosong
+// (tanpa storageState dari project backoffice yang sudah login).
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe.configure({ mode: 'serial' });
 
 test.describe('Back Office - Login @regression', () => {
