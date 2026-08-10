@@ -48,6 +48,7 @@ export class PortalMasterPage {
     await this.page.goto('/master/user');
     await expect(this.userHeading).toBeVisible({ timeout: 15000 });
     await expect(this.addUserButton).toBeVisible({ timeout: 15000 });
+    await this.page.waitForLoadState('networkidle').catch(() => {});
   }
 
   async openAddRoleForm() {
@@ -98,23 +99,35 @@ export class PortalMasterPage {
 
   /** Beri akses SEMUA menu: buka grup Dashboard/Master Data/Aplikasi lalu centang semua checkbox. */
   async grantAllAccess() {
-    const openRegions = () =>
+    const openCount = () =>
       this.page.evaluate(() => document.querySelectorAll('main [data-state="open"]').length);
+
+    await this.page.getByRole('main').getByRole('button', { name: 'Dashboard', exact: true }).first()
+      .waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+    await this.page.waitForTimeout(1000);
 
     for (const group of ['Dashboard', 'Master Data', 'Aplikasi']) {
       const header = this.page.getByRole('main').getByRole('button', { name: group, exact: true }).first();
       if (!(await header.isVisible())) continue;
-      const before = await openRegions();
+      const before = await openCount();
       await header.click();
-      try {
-        await this.page.waitForFunction(
+      const opened = await this.page
+        .waitForFunction(
           (prev) => document.querySelectorAll('main [data-state="open"]').length > prev,
           before,
-          { timeout: 10000 },
-        );
-      } catch {
+          { timeout: 20000 },
+        )
+        .then(() => true)
+        .catch(() => false);
+      if (!opened) {
         await header.click();
-        await this.page.waitForTimeout(1500);
+        await this.page
+          .waitForFunction(
+            (prev) => document.querySelectorAll('main [data-state="open"]').length > prev,
+            before,
+            { timeout: 15000 },
+          )
+          .catch(() => {});
       }
     }
 
@@ -155,10 +168,11 @@ export class PortalMasterPage {
     await this.simpanButton.click();
   }
 
-  /** Cari role di tabel. */
+  /** Cari di tabel (role/user). */
   async search(keyword: string) {
     await this.searchInput.fill(keyword);
     await this.searchInput.press('Enter');
+    await this.page.waitForLoadState('networkidle').catch(() => {});
   }
 
   /** Hapus role jika sudah ada (biar test bisa di-repeat). */

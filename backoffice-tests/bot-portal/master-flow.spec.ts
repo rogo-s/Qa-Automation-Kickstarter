@@ -27,6 +27,7 @@ test.describe('Portal BOT - Master Data Flow @regression', () => {
     await portal.setStatusActive();
     await portal.grantAllAccess();
     await portal.save();
+    await portal.search('SUPERQA');
 
     await expect(page.getByRole('cell', { name: 'SUPERQA', exact: true })).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole('cell', { name: 'QA SUPER ADMIN', exact: true })).toBeVisible({ timeout: 15000 });
