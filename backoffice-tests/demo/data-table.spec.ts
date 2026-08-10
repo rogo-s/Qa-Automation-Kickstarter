@@ -1,6 +1,6 @@
 import { test, expect, Locator } from '@playwright/test';
-import { DataTablePage } from '../shared/pages/DataTablePage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { DataTablePage } from '../../shared/pages/DataTablePage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Sortable Data Tables

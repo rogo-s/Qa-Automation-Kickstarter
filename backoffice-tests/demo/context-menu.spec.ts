@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { ContextMenuPage } from '../shared/pages/ContextMenuPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { ContextMenuPage } from '../../shared/pages/ContextMenuPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Context Menu

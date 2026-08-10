@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { DragDropPage } from '../shared/pages/DragDropPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { DragDropPage } from '../../shared/pages/DragDropPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Drag and Drop

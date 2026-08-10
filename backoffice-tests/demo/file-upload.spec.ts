@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { FileUploadPage } from '../shared/pages/FileUploadPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { FileUploadPage } from '../../shared/pages/FileUploadPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - File Upload

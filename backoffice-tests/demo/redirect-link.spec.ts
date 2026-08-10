@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { RedirectPage } from '../shared/pages/RedirectPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { RedirectPage } from '../../shared/pages/RedirectPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Redirect Link

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { NotificationMessagePage } from '../shared/pages/NotificationMessagePage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { NotificationMessagePage } from '../../shared/pages/NotificationMessagePage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Notification Message

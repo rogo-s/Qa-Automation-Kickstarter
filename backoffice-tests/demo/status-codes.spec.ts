@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { StatusCodesPage } from '../shared/pages/StatusCodesPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { StatusCodesPage } from '../../shared/pages/StatusCodesPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Status Codes

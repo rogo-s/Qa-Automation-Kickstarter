@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { ShadowDomPage } from '../shared/pages/ShadowDomPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { ShadowDomPage } from '../../shared/pages/ShadowDomPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Shadow DOM

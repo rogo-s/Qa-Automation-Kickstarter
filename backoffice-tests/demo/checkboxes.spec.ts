@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { CheckboxesPage } from '../shared/pages/CheckboxesPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { CheckboxesPage } from '../../shared/pages/CheckboxesPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Checkboxes

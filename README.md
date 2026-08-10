@@ -8,18 +8,21 @@ Struktur project ini sengaja dibuat **mirip** dengan setup yang akan dipakai di 
 | Layer | Target | Representasi |
 |---|---|---|
 | API Core | https://dummyjson.com | Dummy REST API (auth, users, products, carts, posts, dll.) |
-| Back Office | https://the-internet.herokuapp.com | Dashboard admin: login, tabel data, upload, form, widget interaktif |
+| Back Office | https://iconnet-portal-backoffice-playground.lentera-app.id | Portal BOT: login OTP, role master, user master, menu |
 | End User App | https://www.saucedemo.com | Login, cart, checkout flow |
+| Unit Test | (lokal) | Agregasi data & PDF report |
 
 ## Cakupan Test Terkni
 
 | Layer | Jumlah Test | File Spec |
 |---|---|---|
 | API Core | 80 | `api-tests/` (10 file) |
-| Back Office | 74 | `backoffice-tests/` (25 file) |
+| Back Office (Portal BOT) | 9 | `backoffice-tests/bot-portal/` + `backoffice-tests/portal/` (3 file) |
 | End User App | 54 | `app-tests/` (7 file) |
-| Unit Test | 5 | `tests/` (1 file) |
-| **Total** | **213** | **43 file** |
+| Unit Test | 5 | `unit-tests/` (1 file) |
+| **Total (aktif)** | **148** | **21 file** |
+
+Test demo the-internet (66 test / 24 file) disimpan terpisah di `backoffice-tests/demo/` dan **tidak ikut run** default.
 
 Setiap skenario dipetakan ke test data dan expected result di `docs/test-data-mapping-*.md`.
 
@@ -33,15 +36,25 @@ npx playwright install   # download browser (Chromium, Firefox, WebKit)
 ## Menjalankan Test
 
 ```bash
-npm test                    # semua test, semua layer
+npm test                    # semua test, semua layer (api, backoffice, app, unit)
 npm run test:api            # API core saja
-npm run test:backoffice     # back office saja
+npm run test:backoffice     # back office (portal BOT) saja
 npm run test:app            # end user app saja
+npm run test:unit           # unit test saja
 npm run test:smoke          # hanya test yang di-tag @smoke
 npm run test:regression     # hanya test yang di-tag @regression
 npm run test:headed         # jalankan dengan browser terlihat (bukan headless)
 npm run report              # buka laporan hasil test terakhir
 npm run report:pdf          # buat laporan PDF rekap dari run terakhir
+```
+
+Setara dengan `npm run test:<layer>`:
+
+```bash
+npx playwright test --project=api
+npx playwright test --project=backoffice
+npx playwright test --project=app
+npx playwright test --project=unit
 ```
 
 Contoh dengan environment staging:
@@ -71,16 +84,18 @@ Isi PDF: header (waktu & durasi run), kartu ringkasan (total/pass/fail/flaky/ski
 qa-automation-demo/
 ├── config/                  # config per environment (local/dev/staging)
 ├── api-tests/               # test API Core (dummyjson.com)
-├── backoffice-tests/        # test Back Office (the-internet.herokuapp.com)
+├── backoffice-tests/
+│   ├── bot-portal/          # test master data portal BOT (role, user, menu)
+│   ├── portal/              # test login & BOT selector portal BOT
+│   └── demo/                # arsip test demo the-internet (tidak ikut run)
 ├── app-tests/               # test End User App (saucedemo.com)
-├── tests/                   # unit test (agregasi PDF report)
+├── unit-tests/              # unit test (agregasi PDF report)
 ├── scripts/                 # script pendukung (generate PDF report)
 ├── shared/
 │   ├── pages/               # Page Object Model (satu file per halaman/komponen)
 │   ├── fixtures/            # custom fixture Playwright (misal auto-login app)
 │   ├── pdf/                 # template HTML & agregasi data untuk PDF report
-│   ├── test-data/           # data test terpusat (users.json, api.json, app.json, backoffice.json)
-│   └── apidata/             # API Collection
+│   └── test-data/           # data test terpusat (users.json, api.json, app.json, backoffice.json)
 ├── docs/                    # dokumentasi mapping skenario test → test data
 ├── playwright.config.ts     # config utama, berisi 4 "project": api, backoffice, app, unit
 └── package.json
@@ -102,18 +117,18 @@ Dokumentasi mapping lengkap ada di:
 - `docs/test-data-mapping-app.md` — End User App
 - `docs/test-data-mapping-backoffice.md` — Back Office
 
-## Cakupan Back Office Dashboard
+## Cakupan Back Office (Portal BOT)
 
-Modul yang diotomatisasi di `backoffice-tests/` (target the-internet.herokuapp.com):
+Modul yang diotomatisasi di `backoffice-tests/` (target portal BOT playground):
 
-- **Dashboard & Navigasi** — judul halaman, daftar modul, klik navigasi
-- **Auth** — login valid/invalid, field kosong, logout
-- **Data** — sortable table, format data, drag & drop
-- **Form & Widget** — checkboxes, dropdown, inputs, slider, add/remove elements
-- **Interaksi** — hover, key presses, dynamic controls/loading, context menu
-- **Alerts & Popup** — JS alerts, multiple windows, entry ad, notification message
-- **Frame** — nested frames, iframe (WYSIWYG)
-- **Lainnya** — status codes, redirect, broken images, shadow DOM, infinite scroll
+- **Setup session** — `auth.setup.ts` login OTP sekali, dipakai bersama oleh project backoffice (dependency `setup`)
+- **Login** — login dengan kredensial valid, login gagal dengan password salah (`portal/login.spec.ts`)
+- **BOT selector** — memilih bot menampilkan semua menu sidebar (`portal/bot-selector.spec.ts`)
+- **Master data** — tambah & verifikasi role, user, dan form menu (`bot-portal/master-flow.spec.ts`)
+
+> **Test demo the-internet** (checkboxes, dropdown, frames, dll.) diarsipkan di `backoffice-tests/demo/`
+> sebagai materi latihan dan di-ignore dari run default via `testIgnore` di `playwright.config.ts`.
+> Untuk menjalankannya manual: `npx playwright test backoffice-tests/demo/<nama-file>`.
 
 ## Konsep yang Dilatih di Project Ini
 

@@ -4,9 +4,10 @@
   "description": "Demo kickstarter project untuk belajar Playwright sebelum implementasi ke environment kerja nyata (dev/staging/prod, API core/back office/end user app)",
   "scripts": {
     "test": "playwright test",
-    "test:api": "playwright test api-tests",
-    "test:backoffice": "playwright test backoffice-tests",
-    "test:app": "playwright test app-tests",
+    "test:api": "playwright test --project=api",
+    "test:backoffice": "playwright test --project=backoffice",
+    "test:app": "playwright test --project=app",
+    "test:unit": "playwright test --project=unit",
     "test:smoke": "playwright test --grep @smoke",
     "test:regression": "playwright test --grep @regression",
     "test:headed": "playwright test --headed",

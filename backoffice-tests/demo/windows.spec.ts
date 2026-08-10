@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { WindowsPage } from '../shared/pages/WindowsPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { WindowsPage } from '../../shared/pages/WindowsPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Multiple Windows

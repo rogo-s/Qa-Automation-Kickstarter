@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { AddRemoveElementsPage } from '../shared/pages/AddRemoveElementsPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { AddRemoveElementsPage } from '../../shared/pages/AddRemoveElementsPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Add/Remove Elements

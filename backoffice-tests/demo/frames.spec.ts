@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { FramesPage } from '../shared/pages/FramesPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { FramesPage } from '../../shared/pages/FramesPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Frames (nested frames & iframe)

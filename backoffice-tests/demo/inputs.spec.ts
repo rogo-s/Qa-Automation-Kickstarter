@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { InputsPage } from '../shared/pages/InputsPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { InputsPage } from '../../shared/pages/InputsPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Inputs

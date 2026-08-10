@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { DynamicLoadingPage } from '../shared/pages/DynamicLoadingPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { DynamicLoadingPage } from '../../shared/pages/DynamicLoadingPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Dynamic Loading

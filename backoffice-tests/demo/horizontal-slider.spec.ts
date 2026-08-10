@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { HorizontalSliderPage } from '../shared/pages/HorizontalSliderPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { HorizontalSliderPage } from '../../shared/pages/HorizontalSliderPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Horizontal Slider

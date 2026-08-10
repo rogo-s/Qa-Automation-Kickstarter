@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { EntryAdPage } from '../shared/pages/EntryAdPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { EntryAdPage } from '../../shared/pages/EntryAdPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Entry Ad

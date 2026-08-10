@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { DropdownPage } from '../shared/pages/DropdownPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { DropdownPage } from '../../shared/pages/DropdownPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Dropdown List

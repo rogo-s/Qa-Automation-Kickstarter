@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { DashboardPage } from '../shared/pages/DashboardPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { DashboardPage } from '../../shared/pages/DashboardPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Dashboard (halaman utama)

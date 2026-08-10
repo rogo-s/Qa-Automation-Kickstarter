@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { BrokenImagesPage } from '../shared/pages/BrokenImagesPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { BrokenImagesPage } from '../../shared/pages/BrokenImagesPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Broken Images

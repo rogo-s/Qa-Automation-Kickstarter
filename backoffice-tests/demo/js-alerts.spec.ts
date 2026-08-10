@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { JSAlertsPage } from '../shared/pages/JSAlertsPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { JSAlertsPage } from '../../shared/pages/JSAlertsPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - JavaScript Alerts

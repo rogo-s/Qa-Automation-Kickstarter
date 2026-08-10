@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { HoverPage } from '../shared/pages/HoverPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { HoverPage } from '../../shared/pages/HoverPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Hovers

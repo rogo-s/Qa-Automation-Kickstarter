@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { InfiniteScrollPage } from '../shared/pages/InfiniteScrollPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { InfiniteScrollPage } from '../../shared/pages/InfiniteScrollPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Infinite Scroll

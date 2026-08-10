@@ -2,15 +2,19 @@ import { defineConfig, devices } from '@playwright/test';
 import { config } from './config';
 
 /**
- * Config ini meniru struktur environment berjenjang (local/dev/staging/prod)
- * dengan membagi test ke 3 "project" sesuai layer produk: api, backoffice, app.
+ * Config meniru struktur environment berjenjang (local/dev/staging/prod)
+ * dengan membagi test ke 4 "project" sesuai layer otomasi: api, backoffice, app, unit.
  *
- * Cara pakai:
- *   npx playwright test                    -> jalankan semua
- *   npx playwright test --project=api       -> jalankan API core saja
- *   npx playwright test --project=backoffice
- *   npx playwright test --project=app
- *   npx playwright test --grep @smoke       -> jalankan yang di-tag smoke saja
+ * Cara pakai (pilih layer):
+ *   npx playwright test                       -> jalankan semua layer
+ *   npx playwright test --project=api         -> API core saja
+ *   npx playwright test --project=backoffice  -> Back Office (portal BOT) saja
+ *   npx playwright test --project=app         -> End-user App saja
+ *   npx playwright test --project=unit        -> Unit test saja
+ *   npx playwright test --grep @smoke         -> yang di-tag @smoke saja
+ *
+ * Test demo (the-internet) disimpan di backoffice-tests/demo dan sengaja
+ * di-ignore supaya tidak ikut run project backoffice.
  */
 export default defineConfig({
   testDir: '.',
@@ -56,6 +60,7 @@ export default defineConfig({
     {
       name: 'backoffice',
       testDir: './backoffice-tests',
+      testIgnore: /demo\//,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
@@ -73,7 +78,7 @@ export default defineConfig({
     },
     {
       name: 'unit',
-      testDir: './tests',
+      testDir: './unit-tests',
       use: {
         ...devices['Desktop Chrome'],
       },

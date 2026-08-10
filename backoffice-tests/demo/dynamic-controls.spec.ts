@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { DynamicControlsPage } from '../shared/pages/DynamicControlsPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { DynamicControlsPage } from '../../shared/pages/DynamicControlsPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Dynamic Controls

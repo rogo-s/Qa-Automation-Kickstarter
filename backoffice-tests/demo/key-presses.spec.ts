@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { KeyPressesPage } from '../shared/pages/KeyPressesPage';
-import backofficeData from '../shared/test-data/backoffice.json';
+import { KeyPressesPage } from '../../shared/pages/KeyPressesPage';
+import backofficeData from '../../shared/test-data/backoffice.json';
 
 /**
  * Studi kasus: Back Office - Key Presses
