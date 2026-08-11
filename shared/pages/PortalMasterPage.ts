@@ -113,6 +113,43 @@ export class PortalMasterPage {
     }
   }
 
+  /** Set status role via form Ubah (aktif/nonaktif) lalu simpan. */
+  async setRoleStatus(code: string, wantActive: boolean) {
+    await this.openEditRoleForm(code);
+    const sw = this.page.getByRole('main').getByRole('switch');
+    const wantState = wantActive ? 'checked' : 'unchecked';
+    if ((await sw.getAttribute('data-state')) !== wantState) {
+      await sw.click({ force: true });
+    }
+    await this.save();
+    await this.page.waitForTimeout(500);
+  }
+
+  /** Nonaktifkan user via menu Nonaktifkan (asumsi data sudah ada). */
+  async deactivateUser(email: string) {
+    await this.search(email);
+    const row = this.page.getByRole('row', { name: new RegExp(email) });
+    await row.getByRole('button', { name: 'Open menu' }).click();
+    await this.page.getByRole('menuitem', { name: 'Nonaktifkan' }).click();
+    await this.confirmAction();
+  }
+
+  /** Aktifkan kembali user via menu Aktifkan. */
+  async activateUser(email: string) {
+    await this.search(email);
+    const row = this.page.getByRole('row', { name: new RegExp(email) });
+    await row.getByRole('button', { name: 'Open menu' }).click();
+    await this.page.getByRole('menuitem', { name: 'Aktifkan' }).click();
+    await this.confirmAction();
+  }
+
+  private async confirmAction() {
+    const confirm = this.page.getByRole('button', { name: /Lanjutkan|Ya|Konfirmasi/i });
+    if (await confirm.count()) {
+      await confirm.first().click();
+    }
+  }
+
   /** Beri akses SEMUA menu: buka grup Dashboard/Master Data/Aplikasi lalu centang semua checkbox. */
   async grantAllAccess() {
     const openCount = () =>
