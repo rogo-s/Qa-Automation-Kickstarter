@@ -66,6 +66,22 @@ export class PortalMasterPage {
     await expect(this.page.getByRole('heading', { name: 'Tambah Pengguna' })).toBeVisible({ timeout: 10000 });
   }
 
+  async openEditRoleForm(code: string) {
+    await this.search(code);
+    const row = this.page.getByRole('row', { name: new RegExp(code) });
+    await row.getByRole('button', { name: 'Open menu' }).click();
+    await this.page.getByRole('menuitem', { name: 'Ubah' }).click();
+    await expect(this.page.getByRole('heading', { name: 'Ubah Role' })).toBeVisible({ timeout: 10000 });
+  }
+
+  async openEditUserForm(email: string) {
+    await this.search(email);
+    const row = this.page.getByRole('row', { name: new RegExp(email) });
+    await row.getByRole('button', { name: 'Open menu' }).click();
+    await this.page.getByRole('menuitem', { name: 'Edit' }).click();
+    await expect(this.page.getByRole('heading', { name: 'Edit Pengguna' })).toBeVisible({ timeout: 10000 });
+  }
+
   async fillRoleForm({ code, name, description }: { code: string; name: string; description: string }) {
     await this.page.getByPlaceholder('Masukan kode').fill(code);
     await this.page.getByPlaceholder('Name', { exact: true }).fill(name);
@@ -144,6 +160,54 @@ export class PortalMasterPage {
     }
   }
 
+  /** Buka semua grup accordion Hak Akses (Dashboard / Master Data / Aplikasi). */
+  private async openPermissionGroups() {
+    for (const group of ['Dashboard', 'Master Data', 'Aplikasi']) {
+      const header = this.page.getByRole('main').getByRole('button', { name: group, exact: true }).first();
+      await header.scrollIntoViewIfNeeded().catch(() => {});
+      await header.click();
+      await this.page.waitForTimeout(400);
+    }
+  }
+
+  /** Set akses role menjadi view only: centang View, kosongkan Add/Delete/Edit/Disable. */
+  async setViewOnlyAccess() {
+    await this.openPermissionGroups();
+    const main = this.page.getByRole('main');
+
+    const clickByAction = async (action: string, want: 'checked' | 'unchecked') => {
+      const labels = main.locator('label', { hasText: new RegExp(`^${action}$`) });
+      const n = await labels.count();
+      for (let i = 0; i < n; i++) {
+        const btn = labels.nth(i).locator('xpath=../button');
+        const st = (await btn.getAttribute('data-state').catch(() => '')) ?? '';
+        if (st !== want) await btn.click({ force: true }).catch(() => {});
+      }
+    };
+
+    for (const action of ['Add', 'Delete', 'Edit', 'Disable']) await clickByAction(action, 'unchecked');
+    await clickByAction('View', 'checked');
+    await this.page.waitForTimeout(500);
+  }
+
+  /** Baca state akses per aksi, mis. { View: ['checked', ...], Add: ['unchecked', ...] }. */
+  async readAccessStates(): Promise<Record<string, string[]>> {
+    await this.openPermissionGroups();
+    const main = this.page.getByRole('main');
+    const result: Record<string, string[]> = {};
+    for (const action of ['Add', 'Delete', 'Edit', 'View', 'Disable']) {
+      const labels = main.locator('label', { hasText: new RegExp(`^${action}$`) });
+      const n = await labels.count();
+      result[action] = [];
+      for (let i = 0; i < n; i++) {
+        const btn = labels.nth(i).locator('xpath=../button');
+        const st = (await btn.getAttribute('data-state').catch(() => '')) ?? '';
+        result[action].push(st);
+      }
+    }
+    return result;
+  }
+
   /** Pilih aplikasi dari listbox (multi-pilih), mis. BOT ICONNET + sub-apps. */
   async selectApplications(apps: string[]) {
     const trigger = this.page
@@ -175,7 +239,7 @@ export class PortalMasterPage {
     await this.page.waitForLoadState('networkidle').catch(() => {});
   }
 
-  /** Hapus role jika sudah ada (biar test bisa di-repeat). */
+  /** Hapus role jika sudah ada (biar test bisa di-repeat). Gagal jika role masih dipakai data lain. */
   async deleteRoleIfExists(code: string) {
     await this.search(code);
     const row = this.page.getByRole('row', { name: new RegExp(code) });
@@ -183,7 +247,9 @@ export class PortalMasterPage {
       await row.getByRole('button', { name: 'Open menu' }).click();
       await this.page.getByRole('menuitem', { name: 'Hapus' }).click();
       await this.confirmDelete();
-      await expect(this.page.getByRole('row', { name: new RegExp(code) })).toHaveCount(0, { timeout: 10000 }).catch(() => {});
+      await expect(this.page.getByRole('row', { name: new RegExp(code) })).toHaveCount(0, {
+        timeout: 10000,
+      });
     }
   }
 
@@ -195,7 +261,9 @@ export class PortalMasterPage {
       await row.getByRole('button', { name: 'Open menu' }).click();
       await this.page.getByRole('menuitem', { name: 'Hapus' }).click();
       await this.confirmDelete();
-      await expect(this.page.getByRole('row', { name: new RegExp(email) })).toHaveCount(0, { timeout: 10000 }).catch(() => {});
+      await expect(this.page.getByRole('row', { name: new RegExp(email) })).toHaveCount(0, {
+        timeout: 10000,
+      });
     }
   }
 
