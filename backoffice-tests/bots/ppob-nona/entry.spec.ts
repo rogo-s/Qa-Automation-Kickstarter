@@ -32,7 +32,10 @@ test.describe('Portal BOT - Masuk ke BOT PPOB NONA @regression', () => {
     // Klik Masuk membuka webview BOT di tab baru.
     const botPage = await selector.enterBot('BOT PPOB NONA');
     await botPage.waitForLoadState('domcontentloaded');
-    await expect(botPage).toHaveURL(/backoffice-ppob-nona-webview-playground\.lentera-app\.id\/?$/);
+    // Popup mendarat di /sso/callback?jwt_token=... lalu di-redirect ke root.
+    await botPage.waitForURL(/backoffice-ppob-nona-webview-playground\.lentera-app\.id\/?$/, {
+      timeout: 30000,
+    });
     await expect(botPage.getByText('Selamat Datang, Rogo')).toBeVisible({ timeout: 15000 });
     await expect(
       botPage.getByRole('button', { name: 'Toggle Sidebar' }).first()

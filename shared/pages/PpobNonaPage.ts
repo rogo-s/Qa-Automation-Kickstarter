@@ -41,7 +41,11 @@ export class PpobNonaPage {
     await card.getByRole('button', { name: 'Masuk' }).click();
     const webview = await popupPromise;
     await webview.waitForLoadState('domcontentloaded');
-    await expect(webview).toHaveURL(/backoffice-ppob-nona-webview-playground\.lentera-app\.id\/?$/);
+    // Popup mendarat di /sso/callback?jwt_token=... lalu di-redirect ke root.
+    // Tunggu sampai redirect selesai (root) dengan timeout cukup.
+    await webview.waitForURL(/backoffice-ppob-nona-webview-playground\.lentera-app\.id\/?$/, {
+      timeout: 30000,
+    });
     await webview.waitForTimeout(1500);
     return new PpobNonaPage(webview);
   }
