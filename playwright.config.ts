@@ -48,6 +48,7 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
       use: {
         baseURL: config.backoffice_base_url,
+        headless: false,
       },
     },
     {
@@ -67,6 +68,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         baseURL: config.backoffice_base_url,
         storageState: '.auth/portal.json',
+        headless: false,
         launchOptions: { slowMo: 1000 },
       },
     },

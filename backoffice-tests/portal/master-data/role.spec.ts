@@ -4,14 +4,36 @@ import { PortalMasterPage } from '../../../shared/pages/PortalMasterPage';
 test.describe.configure({ mode: 'serial', timeout: 240000 });
 
 /**
- * Flow E2E Edit/Update Master Data Portal BOT (1x login via auth.setup.ts):
- * 1. Edit role: ubah jadi QAPENTESTER / Pentester satu, akses view only
- * 2. Edit user: ubah jadi Penestrasi testing, role tetap QAPENTESTER
- * Setup memakai konsep add (delete-if-exists lalu create) agar flow bisa di-repeat,
- * setelah itu dilakukan operasi edit (Ubah Role / Edit Pengguna).
+ * Menu Role - Portal BOT (1x login via auth.setup.ts):
+ * 1. Tambah Role SUPERQA / QA SUPER ADMIN (akses semua menu, status aktif)
+ * 2. Edit role: ubah jadi QAPENTESTER / Pentester satu, akses view only
+ * 3. Role QAPENTESTER: nonaktifkan lalu aktifkan kembali (via form Ubah / switch Status)
  */
-test.describe('Portal BOT - Edit Flow @regression', () => {
-  test('1. Edit role: QAPENTESTER, Pentester satu, akses view only @smoke', async ({ page }) => {
+test.describe('Portal BOT - Menu Role @regression', () => {
+  test('1. Tambah role SUPERQA / QA SUPER ADMIN lalu verifikasi @smoke', async ({ page }) => {
+    const portal = new PortalMasterPage(page);
+    await portal.openRolePage();
+    await portal.openUserPage();
+    await portal.deleteUserIfExists('testing@yopmail.com');
+    await portal.openRolePage();
+    await portal.deleteRoleIfExists('SUPERQA');
+    await portal.openAddRoleForm();
+
+    await portal.fillRoleForm({
+      code: 'SUPERQA',
+      name: 'QA SUPER ADMIN',
+      description: 'Role QA Super Admin dibuat oleh automation test',
+    });
+    await portal.setStatusActive();
+    await portal.grantAllAccess();
+    await portal.save();
+    await portal.search('SUPERQA');
+
+    await expect(page.getByRole('cell', { name: 'SUPERQA', exact: true })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('cell', { name: 'QA SUPER ADMIN', exact: true })).toBeVisible({ timeout: 15000 });
+  });
+
+  test('2. Edit role: QAPENTESTER, Pentester satu, akses view only @smoke', async ({ page }) => {
     const portal = new PortalMasterPage(page);
 
     // setup (konsep add, biar repeatable): role QAPENTESTER dibuat dulu dgn akses penuh.
@@ -59,41 +81,21 @@ test.describe('Portal BOT - Edit Flow @regression', () => {
     expect(states.View?.every((s) => s === 'checked')).toBeTruthy();
   });
 
-  test('2. Edit user: Penestrasi testing, role QAPENTESTER @smoke', async ({ page }) => {
+  test('3. Role QAPENTESTER: nonaktifkan lalu aktifkan lagi @smoke', async ({ page }) => {
     const portal = new PortalMasterPage(page);
 
-    // setup (konsep add, biar repeatable): user dibuat dulu dgn role QAPENTESTER
-    await portal.openUserPage();
-    await portal.deleteUserIfExists('pentest@yopmail.com');
-    await portal.openAddUserForm();
-    await portal.fillUserForm({
-      fullname: 'User Pentest Awal',
-      email: 'pentest@yopmail.com',
-      phoneNumber: '089600000001',
-      password: 'Password@123',
-    });
-    await portal.selectApplications(['BOT ICONNET']);
-    await portal.selectRole('Pentester satu');
-    await portal.setStatusActive();
-    await portal.save();
-    await portal.search('pentest@yopmail.com');
-    await expect(page.getByRole('cell', { name: 'pentest@yopmail.com' })).toBeVisible({ timeout: 15000 });
+    await portal.openRolePage();
+    await expect(page.getByRole('cell', { name: 'QAPENTESTER', exact: true })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('row', { name: /QAPENTESTER/ })).toContainText('Aktif', { timeout: 10000 });
 
-    // edit user: ubah data, role tetap QAPENTESTER (mengikuti role yang diedit)
-    await portal.openEditUserForm('pentest@yopmail.com');
-    await portal.fillUserForm({
-      fullname: 'Penestrasi testing',
-      email: 'pentest@yopmail.com',
-      phoneNumber: '086736483824',
-      password: 'Password@321',
-    });
-    await expect(
-      page.getByRole('button', { name: 'Pentester satu', exact: true }).first(),
-    ).toBeVisible({ timeout: 10000 });
-    await portal.save();
-    await portal.search('pentest@yopmail.com');
+    // nonaktifkan
+    await portal.setRoleStatus('QAPENTESTER', false);
+    await portal.search('QAPENTESTER');
+    await expect(page.getByRole('row', { name: /QAPENTESTER/ })).toContainText('Tidak Aktif', { timeout: 15000 });
 
-    await expect(page.getByRole('cell', { name: 'pentest@yopmail.com' })).toBeVisible({ timeout: 15000 });
-    await expect(page.getByRole('cell', { name: 'Penestrasi testing', exact: true })).toBeVisible({ timeout: 15000 });
+    // aktifkan kembali
+    await portal.setRoleStatus('QAPENTESTER', true);
+    await portal.search('QAPENTESTER');
+    await expect(page.getByRole('row', { name: /QAPENTESTER/ })).toContainText('Aktif', { timeout: 15000 });
   });
 });
