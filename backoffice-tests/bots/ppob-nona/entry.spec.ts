@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { AdminLoginPage } from '../../shared/pages/AdminLoginPage';
-import { BotSelectorPage } from '../../shared/pages/BotSelectorPage';
-import usersData from '../../shared/test-data/users.json';
-import backofficeData from '../../shared/test-data/backoffice.json';
+import { AdminLoginPage } from '../../../shared/pages/AdminLoginPage';
+import { BotSelectorPage } from '../../../shared/pages/BotSelectorPage';
+import usersData from '../../../shared/test-data/users.json';
+import backofficeData from '../../../shared/test-data/backoffice.json';
 
 const admin = usersData.backoffice.admin;
 const data = backofficeData.login;

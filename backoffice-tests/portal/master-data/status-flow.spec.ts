@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { PortalMasterPage } from '../../shared/pages/PortalMasterPage';
+import { PortalMasterPage } from '../../../shared/pages/PortalMasterPage';
 
 test.describe.configure({ mode: 'serial', timeout: 240000 });
 
