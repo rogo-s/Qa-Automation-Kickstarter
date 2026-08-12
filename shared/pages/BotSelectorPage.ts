@@ -25,6 +25,10 @@ export class BotSelectorPage {
     return this.botCards.filter({ hasText: name }).first();
   }
 
+  botByCode(code: string): Locator {
+    return this.botCards.filter({ has: this.page.locator('h3', { hasText: code }) }).first();
+  }
+
   botCode(name: string): Locator {
     return this.botCard(name).locator('h3');
   }
