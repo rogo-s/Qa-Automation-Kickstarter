@@ -1,0 +1,55 @@
+import { chromium } from '@playwright/test';
+import { config } from '../config';
+
+const WEBVIEW = 'https://backoffice-ppob-nona-webview-playground.lentera-app.id';
+
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({ storageState: '.auth/portal.json', baseURL: config.backoffice_base_url });
+  const page = await context.newPage();
+  let webview;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await page.goto('/');
+      await page.getByText('Pilih BOT Anda').waitFor({ timeout: 15000 });
+      const card = page.locator('div.p-4.border.rounded-lg', { hasText: 'BOT PPOB NONA' }).first();
+      const popupPromise = page.waitForEvent('popup', { timeout: 20000 });
+      await card.getByRole('button', { name: 'Masuk' }).click();
+      webview = await popupPromise;
+      await webview.waitForURL(/backoffice-ppob-nona-webview-playground\.lentera-app\.id\/?$/, { timeout: 30000 });
+      await webview.waitForTimeout(1500);
+      break;
+    } catch { await page.waitForTimeout(2000); }
+  }
+  if (!webview) throw new Error('popup gagal');
+  await webview.goto(WEBVIEW + '/master/menu');
+  await webview.waitForTimeout(3000);
+  await webview.locator('main button', { hasText: 'Tambah Menu' }).click();
+  await webview.waitForTimeout(2000);
+  const form = webview.locator('main form').last();
+  const save = () => form.locator('button[type="submit"]').isDisabled();
+  const st = async (label: string) => console.log(label, 'disabled:', await save());
+
+  await st('empty');
+  await form.locator('input[name="title"]').fill('Menu Tes');
+  await webview.waitForTimeout(500); await st('title');
+  await form.locator('input[name="code"]').fill('menutes');
+  await webview.waitForTimeout(500); await st('title+code');
+  await form.locator('input[name="icon"]').fill('lucide-layout');
+  await webview.waitForTimeout(500); await st('+icon');
+  await form.locator('input[name="permissionString"]').fill('CREATE,EDIT');
+  await webview.waitForTimeout(500); await st('+permission');
+  await form.locator('textarea[name="description"]').fill('desc');
+  await webview.waitForTimeout(500); await st('+description');
+  // parent
+  await form.locator('button', { hasText: 'Pilih parent menu' }).click();
+  await webview.waitForTimeout(1000);
+  await webview.getByRole('option', { name: 'Master', exact: true }).click();
+  await webview.waitForTimeout(600); await st('+parent Master');
+  // urutan
+  await form.locator('button', { hasText: 'Default' }).click();
+  await webview.waitForTimeout(1000);
+  await webview.getByRole('option', { name: '3', exact: true }).click();
+  await webview.waitForTimeout(600); await st('+urutan 3');
+  await browser.close();
+})();
