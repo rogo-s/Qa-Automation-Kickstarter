@@ -164,4 +164,28 @@ export class PpobNonaWebviewPage {
   async getVaNumber(): Promise<string> {
     return (await this.vaNumber().textContent()).trim().replace(/\s+/g, ' ');
   }
+
+  // ---------- RIWAYAT TRANSAKSI ----------
+
+  /** Buka halaman Riwayat Transaksi (daftar transaksi berdasarkan ID Pelanggan/Nomor Meter). */
+  async openHistory(idpel: string) {
+    await this.goto('/transaction-history');
+    await expect(this.page.getByText('ID Pelanggan / Nomor Meter')).toBeVisible({ timeout: 15000 });
+    await expect(this.page.getByRole('button', { name: /Cari Transaksi/ })).toBeVisible({ timeout: 10000 });
+    await this.page.locator('#search').fill(idpel);
+  }
+
+  /** Klik Cari Transaksi lalu menunggu daftar hasil (atau pesan kosong). */
+  async searchHistory() {
+    await this.page.getByRole('button', { name: /Cari Transaksi/ }).click();
+    await expect(this.page.getByText(/Daftar Transaksi Terakhir/)).toBeVisible({ timeout: 15000 });
+  }
+
+  historyRow(): Locator {
+    return this.page.locator('table tbody tr').first();
+  }
+
+  historyEmpty(): Locator {
+    return this.page.getByText('Tidak ada data transaksi').first();
+  }
 }
