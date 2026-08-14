@@ -12,7 +12,13 @@ import { config } from '../../config';
  *  -> pilih nominal token -> pilih metode bayar (Bank Mandiri)
  *  -> Bayar Sekarang (payment-confirm) -> tampil Nomor Virtual Account
  *
- * Catatan: Biaya Memasak sedang maintenance, scope saat ini prepaid & postpaid (prepaid dulu).
+ * Validasi:
+ *  - ID Pelanggan non-angka -> error client-side (tanpa API):
+ *    "ID Pelanggan / Nomor Meter harus berupa angka dengan panjang 9 sampai 13 digit"
+ *  - ID salah tapi format valid -> error "IDPEL YANG ANDA MASUKKAN SALAH"
+ *  - OTP salah -> toast "Invalid otp"; form tetap terbuka, bisa diisi ulang (maks 1x salah di test).
+ *
+ * Catatan: Biaya Memasak sedang maintenance; OTP sangat dibatasi rate-limit server, jangan trigger >1x salah.
  */
 export class PpobNonaWebviewPage {
   readonly page: Page;
@@ -26,14 +32,28 @@ export class PpobNonaWebviewPage {
     await this.page.waitForLoadState('domcontentloaded');
   }
 
-  // ---------- PREPAID ----------
+  // ---------- FORM DATA PELANGGAN ----------
 
   private customerInputs(): Locator {
     return this.page.locator('input[type="text"]');
   }
 
-  private otpInputs(): Locator {
-    return this.page.locator('input[type="text"]');
+  customerIdInput(): Locator {
+    return this.customerInputs().nth(0);
+  }
+
+  customerPhoneInput(): Locator {
+    return this.customerInputs().nth(1);
+  }
+
+  customerContinueButton(): Locator {
+    return this.page.getByRole('button', { name: 'Lanjutkan', exact: true });
+  }
+
+  customerError(): Locator {
+    return this.page.locator('main, body').getByText(
+      /harus berupa angka dengan panjang 9 sampai 13 digit|IDPEL YANG ANDA MASUKKAN SALAH/
+    ).first();
   }
 
   async openPrepaid() {
@@ -41,22 +61,49 @@ export class PpobNonaWebviewPage {
     await expect(this.page.getByText('Masukan Data Pelanggan')).toBeVisible({ timeout: 15000 });
   }
 
-  /** Isi ID Pelanggan/Nomor Meter + No HP lalu klik Lanjutkan (trigger send-otp). */
+  /** Isi form ID Pelanggan + No HP (tanpa klik). */
   async fillCustomer(customerId: string, phone: string) {
-    const inputs = this.customerInputs();
-    await inputs.nth(0).fill(customerId);
-    await inputs.nth(1).fill(phone);
-    await this.page.getByRole('button', { name: 'Lanjutkan', exact: true }).click();
+    await this.customerIdInput().fill(customerId);
+    await this.customerPhoneInput().fill(phone);
+  }
+
+  async clickLanjutkan() {
+    await this.customerContinueButton().click();
+  }
+
+  /** Isi form lalu klik Lanjutkan; menunggu layar OTP. */
+  async submitCustomer(customerId: string, phone: string) {
+    await this.fillCustomer(customerId, phone);
+    await this.clickLanjutkan();
     await expect(this.page.getByText('Masukan Kode OTP')).toBeVisible({ timeout: 15000 });
   }
 
-  /** Isi 6 kotak OTP lalu klik Verifikasi. */
-  async verifyOtp(digits: string) {
-    const boxes = this.otpInputs();
+  // ---------- OTP ----------
+
+  private otpBoxes(): Locator {
+    return this.page.locator('input[type="text"]');
+  }
+
+  otpVerifyButton(): Locator {
+    return this.page.getByRole('button', { name: 'Verifikasi', exact: true });
+  }
+
+  otpInvalidToast(): Locator {
+    return this.page.getByText('Invalid otp').first();
+  }
+
+  /** Isi 6 kotak OTP lalu klik Verifikasi (tanpa menunggu sukses). */
+  async fillOtp(digits: string) {
+    const boxes = this.otpBoxes();
     for (let i = 0; i < 6; i++) {
       await boxes.nth(i).fill(digits[i] ?? '0');
     }
-    await this.page.getByRole('button', { name: 'Verifikasi', exact: true }).click();
+    await this.otpVerifyButton().click();
+  }
+
+  /** Isi OTP benar lalu menunggu layar Informasi Pelanggan. */
+  async verifyOtp(digits: string) {
+    await this.fillOtp(digits);
     await expect(this.page.getByText('Informasi Pelanggan')).toBeVisible({ timeout: 15000 });
   }
 
@@ -69,6 +116,22 @@ export class PpobNonaWebviewPage {
       tariff: text.includes('B2 / 7700VA') ? 'B2 / 7700VA' : '',
     };
   }
+
+  // ---------- POSTPAID ----------
+
+  async openPostpaid() {
+    await this.goto('/postpaid');
+    await expect(this.page.getByText('Masukan Data Pelanggan')).toBeVisible({ timeout: 15000 });
+  }
+
+  /** Halaman Informasi Pelanggan postpaid: isi form lalu OTP, menunggu detail tagihan. */
+  async submitPostpaid(customerId: string, phone: string) {
+    await this.submitCustomer(customerId, phone);
+    await this.verifyOtp('000000');
+    await expect(this.page.getByText('Detail Tagihan')).toBeVisible({ timeout: 15000 });
+  }
+
+  // ---------- PEMBAYARAN ----------
 
   /** Pilih nominal token (default Rp 5.000,00). */
   async selectDenom(label: string) {
