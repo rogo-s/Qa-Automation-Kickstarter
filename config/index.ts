@@ -7,6 +7,7 @@ export type EnvironmentConfig = {
   api_base_url: string;
   backoffice_base_url: string;
   app_base_url: string;
+  ppob_nona_webview_base_url?: string;
   note?: string;
 };
 

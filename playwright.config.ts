@@ -52,6 +52,15 @@ export default defineConfig({
       },
     },
     {
+      name: 'setup-webview-nona',
+      testDir: '.',
+      testMatch: /auth\.webview-nona\.setup\.ts/,
+      use: {
+        baseURL: config.ppob_nona_webview_base_url,
+        headless: false,
+      },
+    },
+    {
       name: 'api',
       testDir: './api-tests',
       use: {
@@ -61,13 +70,26 @@ export default defineConfig({
     {
       name: 'backoffice',
       testDir: './backoffice-tests',
-      testIgnore: /demo\//,
+      testIgnore: [/demo\//, /webview-nona\//],
       dependencies: ['setup'],
       timeout: 120000,
       use: {
         ...devices['Desktop Chrome'],
         baseURL: config.backoffice_base_url,
         storageState: '.auth/portal.json',
+        headless: false,
+        launchOptions: { slowMo: 1000 },
+      },
+    },
+    {
+      name: 'webview-nona',
+      testDir: './backoffice-tests/bots/ppob-nona/webview-nona',
+      dependencies: ['setup-webview-nona'],
+      timeout: 120000,
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: config.ppob_nona_webview_base_url,
+        storageState: '.auth/webview-nona.json',
         headless: false,
         launchOptions: { slowMo: 1000 },
       },

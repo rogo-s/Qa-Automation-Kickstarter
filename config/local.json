@@ -3,5 +3,6 @@
   "api_base_url": "https://dummyjson.com",
   "backoffice_base_url": "https://iconnet-portal-backoffice-playground.lentera-app.id",
   "app_base_url": "https://www.saucedemo.com",
-  "note": "Backoffice sekarang diarahkan ke portal playground yang Anda gunakan untuk adaptasi flow login baru."
+  "note": "Backoffice sekarang diarahkan ke portal playground yang Anda gunakan untuk adaptasi flow login baru.",
+  "ppob_nona_webview_base_url": "https://ppob-nona-webview-playground.lentera-app.id"
 }
