@@ -1,4 +1,5 @@
 import type { AggregateReport, LayerSummary, FailureEntry, TestCaseEntry } from './aggregate';
+import { FINDINGS, type Finding } from './findings';
 
 function formatDate(iso: string): string {
   if (!iso) return '-';
@@ -73,6 +74,47 @@ function failureRows(failures: FailureEntry[]): string {
         <pre class="failure-error">${escapeHtml(f.error)}</pre>
       </div>`,
     )
+    .join('');
+}
+
+function findingBadge(category: Finding['category']): string {
+  switch (category) {
+    case 'BUG':
+      return '<span class="badge badge-fail">BUG</span>';
+    case 'CHANGE':
+      return '<span class="badge badge-flaky">CHANGE</span>';
+    case 'DATA':
+      return '<span class="badge badge-skip">DATA</span>';
+    case 'INFRA':
+      return '<span class="badge badge-skip">INFRA</span>';
+    case 'NOTE':
+      return '<span class="badge badge-pass">NOTE</span>';
+  }
+}
+
+function findingStatus(status: Finding['status']): string {
+  switch (status) {
+    case 'OPEN':
+      return '<span class="badge badge-fail">OPEN</span>';
+    case 'MONITORED':
+      return '<span class="badge badge-flaky">MONITORED</span>';
+    case 'RESOLVED':
+      return '<span class="badge badge-pass">RESOLVED</span>';
+    case 'INFO':
+      return '<span class="badge badge-skip">INFO</span>';
+  }
+}
+
+function findingRows(): string {
+  return FINDINGS.map(
+    (f) => `
+    <tr>
+      <td class="case-meta">${f.id}</td>
+      <td>${findingBadge(f.category)} ${findingStatus(f.status)}</td>
+      <td class="case-title">${escapeHtml(f.title)}</td>
+      <td>${escapeHtml(f.detail)}</td>
+    </tr>`,
+  )
     .join('');
 }
 
@@ -200,6 +242,19 @@ export function renderReport(aggregate: AggregateReport): string {
 
   <h2>Daftar Test Gagal</h2>
   ${failureRows(aggregate.failures)}
+
+  <h2>Catatan Temuan (${FINDINGS.length})</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:14%">Kode</th>
+        <th style="width:16%">Kategori / Status</th>
+        <th style="width:30%">Judul</th>
+        <th>Detail</th>
+      </tr>
+    </thead>
+    <tbody>${findingRows()}</tbody>
+  </table>
 
   <p class="footer">Sumber data: ${aggregate.source}</p>
 </body>
