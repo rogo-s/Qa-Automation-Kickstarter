@@ -1,4 +1,4 @@
-import type { AggregateReport, LayerSummary, FailureEntry } from './aggregate';
+import type { AggregateReport, LayerSummary, FailureEntry, TestCaseEntry } from './aggregate';
 
 function formatDate(iso: string): string {
   if (!iso) return '-';
@@ -84,6 +84,34 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function statusBadge(status: TestCaseEntry['status']): string {
+  switch (status) {
+    case 'passed':
+      return '<span class="badge badge-pass">PASS</span>';
+    case 'failed':
+      return '<span class="badge badge-fail">FAIL</span>';
+    case 'flaky':
+      return '<span class="badge badge-flaky">FLAKY</span>';
+    case 'skipped':
+      return '<span class="badge badge-skip">SKIP</span>';
+  }
+}
+
+function caseRows(cases: TestCaseEntry[]): string {
+  return cases
+    .map(
+      (c) => `
+      <tr>
+        <td class="case-status">${statusBadge(c.status)}</td>
+        <td class="case-title">${escapeHtml(c.title)}</td>
+        <td class="case-meta">${escapeHtml(c.project)}</td>
+        <td class="case-meta">${escapeHtml(c.location)}</td>
+        <td class="case-meta">${formatDuration(c.duration)}</td>
+      </tr>`,
+    )
+    .join('');
+}
+
 export function renderReport(aggregate: AggregateReport): string {
   const { total, passed, failed, flaky, skipped, passRate } = aggregate;
 
@@ -125,6 +153,14 @@ export function renderReport(aggregate: AggregateReport): string {
   .failure { border: 1px solid #f3d4d4; background: #fdf5f5; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; }
   .failure-title { font-weight: bold; margin: 0; color: #a61b1b; }
   .failure-error { white-space: pre-wrap; word-break: break-word; font-family: monospace; font-size: 10px; background: #fff; border: 1px solid #eee; border-radius: 4px; padding: 6px; margin: 6px 0 0; max-height: 80px; overflow: hidden; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.4px; }
+  .badge-pass { background: #e5f7ee; color: #14804a; }
+  .badge-fail { background: #fdeaea; color: #c81e1e; }
+  .badge-flaky { background: #fdf3e3; color: #b7791f; }
+  .badge-skip { background: #eef1f4; color: #52606d; }
+  .case-status { white-space: nowrap; }
+  .case-title { font-weight: 600; }
+  .case-meta { color: #7b8794; font-size: 10px; white-space: nowrap; }
   .footer { margin-top: 28px; border-top: 1px solid #e4e7eb; padding-top: 8px; font-size: 10px; color: #7b8794; }
   @media print {
     body { padding: 0; }
@@ -147,6 +183,20 @@ export function renderReport(aggregate: AggregateReport): string {
 
   <h2>Ringkasan per Layer</h2>
   ${layerTable(aggregate.layers)}
+
+  <h2>Detail Test Case (${aggregate.cases.length})</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Test Case</th>
+        <th>Layer</th>
+        <th>Lokasi</th>
+        <th>Durasi</th>
+      </tr>
+    </thead>
+    <tbody>${caseRows(aggregate.cases)}</tbody>
+  </table>
 
   <h2>Daftar Test Gagal</h2>
   ${failureRows(aggregate.failures)}

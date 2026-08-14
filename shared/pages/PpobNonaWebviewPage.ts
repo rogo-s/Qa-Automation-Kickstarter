@@ -133,9 +133,10 @@ export class PpobNonaWebviewPage {
 
   // ---------- PEMBAYARAN ----------
 
-  /** Pilih nominal token (default Rp 5.000,00). */
+  /** Pilih nominal token (label dipakai sebagai substring; toleran format desimal). */
   async selectDenom(label: string) {
-    await this.page.getByRole('button', { name: label, exact: true }).click();
+    const safe = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    await this.page.getByRole('button', { name: new RegExp(safe.replace(',00', '(,00)?')) }).first().click();
   }
 
   /** Buka panel "Pilih Metode Pembayaran". */

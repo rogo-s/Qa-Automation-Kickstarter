@@ -51,14 +51,14 @@ test.describe('PPOB NONA Webview - Postpaid create VA @regression', () => {
 
     // Detail tagihan postpaid tampil (tanpa pilihan nominal seperti prepaid).
     await expect(page.getByText('Detail Tagihan')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Rp 2.605.289,00').first()).toBeVisible();
+    await expect(page.getByText(/Rp\s*2\.605\.289(?:,00)?/).first()).toBeVisible();
 
     // Pilih metode Bank Mandiri lalu Bayar Sekarang.
     await webview.openPaymentMethod();
     await webview.selectBank('Bank Mandiri');
 
     await expect(page.getByText('Total Pembayaran').first()).toBeVisible();
-    await expect(page.getByText('Rp 2.605.289,00').first()).toBeVisible();
+    await expect(page.getByText(/Rp\s*2\.605\.289(?:,00)?/).first()).toBeVisible();
     await webview.payNow();
 
     // Nomor Virtual Account muncul & berawal 999 (prefix VA), total tagihan tertera.
@@ -67,6 +67,6 @@ test.describe('PPOB NONA Webview - Postpaid create VA @regression', () => {
     expect(va.replace(/\D/g, '').length).toBeGreaterThanOrEqual(16);
     await expect(page.getByText('Bank Mandiri').first()).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Selesaikan Pembayaran' })).toBeVisible();
-    await expect(page.getByText('Rp 2.605.289,00').first()).toBeVisible();
+    await expect(page.getByText(/Rp\s*2\.605\.289(?:,00)?/).first()).toBeVisible();
   });
 });

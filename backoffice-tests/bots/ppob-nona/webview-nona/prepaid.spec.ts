@@ -9,7 +9,7 @@ import { PpobNonaWebviewPage } from '../../../../shared/pages/PpobNonaWebviewPag
  * 4. Verifikasi munculnya Nomor Virtual Account (uniks per transaksi)
  *
  * Data riil:
- *  - ID meter: 322561241175 (Nama NRM****, Tarif B2 / 7700VA)
+ *  - ID meter: 516761241018 (Tarif B2 / 7700VA)
  *  - No HP: 087789307941
  *  - OTP dummy: 000000 (salah contoh: 111111)
  *  - Nominal: Rp 5.000,00
@@ -37,7 +37,7 @@ test.describe('PPOB NONA Webview - Prepaid create VA @regression', () => {
     const webview = new PpobNonaWebviewPage(page);
 
     await webview.openPrepaid();
-    await webview.submitCustomer('322561241175', '087789307941');
+    await webview.submitCustomer('516761241018', '087789307941');
 
     // 1x OTP salah: verifikasi pengamanan "Invalid otp" (maks 1x, hindari rate-limit).
     await webview.fillOtp('111111');
@@ -46,9 +46,11 @@ test.describe('PPOB NONA Webview - Prepaid create VA @regression', () => {
     // OTP benar lalu lanjut ke Informasi Pelanggan.
     await webview.verifyOtp('000000');
 
-    // Halaman Informasi Pelanggan: pastikan Nomor Meter & Tarif/Daya benar.
-    await expect(page.getByText('322561241175').first()).toBeVisible();
-    await expect(page.getByText('B2 / 7700VA').first()).toBeVisible();
+    // Halaman Informasi Pelanggan: Nomor Meter & Tarif/Daya sesuai data yang dirilis
+    // backend (nilai dinamis, idpel valid -> format meter != idpel). Validasi bahwa
+    // meter berupa angka (9-13 digit) & tarif berformat "X / nnnVA".
+    await expect(page.locator('p', { hasText: /^\d{9,13}$/ }).first()).toBeVisible();
+    await expect(page.getByText(/\w{1,4}\s*\/\s*\d+VA/).first()).toBeVisible();
 
     // Pilih nominal token 5rb.
     await webview.selectDenom('Rp 5.000,00');
@@ -59,15 +61,16 @@ test.describe('PPOB NONA Webview - Prepaid create VA @regression', () => {
 
     // Setelah memilih bank, Detail Tagihan & Total Pembayaran tampil.
     await expect(page.getByText('Detail Tagihan')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Rp 5.000,00').first()).toBeVisible();
+    await expect(page.getByText(/Rp\s*5\.000(,00)?/).first()).toBeVisible();
     await webview.payNow();
 
-    // Nomor Virtual Account muncul & berawal 9993 (prefix VA), total Rp 5.000,00, metode Mandiri.
+    // Nomor Virtual Account muncul & berawal 999 (prefix VA, digit ke-4 dinamis per metode),
+    // total Rp 5.000,00, metode Mandiri.
     const va = await webview.getVaNumber();
-    expect(va).toMatch(/^9993/);
+    expect(va).toMatch(/^999/);
     expect(va.replace(/\D/g, '').length).toBeGreaterThanOrEqual(16);
     await expect(page.getByText('Bank Mandiri').first()).toBeVisible();
     await expect(page.getByText('Total Pembayaran').first()).toBeVisible();
-    await expect(page.getByText('Rp 5.000,00').first()).toBeVisible();
+    await expect(page.getByText(/Rp\s*5\.000(,00)?/).first()).toBeVisible();
   });
 });

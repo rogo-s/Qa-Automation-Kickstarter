@@ -23,6 +23,14 @@ export type FailureEntry = {
   error: string;
 };
 
+export type TestCaseEntry = {
+  title: string;
+  project: string;
+  location: string;
+  status: 'passed' | 'failed' | 'flaky' | 'skipped';
+  duration: number;
+};
+
 export type AggregateReport = {
   startTime: string;
   duration: number;
@@ -34,6 +42,7 @@ export type AggregateReport = {
   passRate: number;
   layers: LayerSummary[];
   failures: FailureEntry[];
+  cases: TestCaseEntry[];
   source: string;
 };
 
@@ -95,6 +104,7 @@ export function aggregateReport(raw: unknown, source: string, projectFilter?: st
 
   const layers = new Map<string, LayerSummary>();
   const failures: FailureEntry[] = [];
+  const cases: TestCaseEntry[] = [];
 
   for (const spec of filtered) {
     const project = spec.test.projectName ?? 'unknown';
@@ -103,15 +113,19 @@ export function aggregateReport(raw: unknown, source: string, projectFilter?: st
     const duration = spec.test.results?.reduce((sum, r) => sum + (r.duration ?? 0), 0) ?? 0;
     layer.duration += duration;
 
+    let status: TestCaseEntry['status'] = 'failed';
     switch (spec.test.status) {
       case 'expected':
         layer.passed += 1;
+        status = 'passed';
         break;
       case 'flaky':
         layer.flaky += 1;
+        status = 'flaky';
         break;
       case 'skipped':
         layer.skipped += 1;
+        status = 'skipped';
         break;
       case 'unexpected':
       default:
@@ -125,6 +139,14 @@ export function aggregateReport(raw: unknown, source: string, projectFilter?: st
         });
         break;
     }
+
+    cases.push({
+      title: spec.title,
+      project,
+      location: `${spec.file}:${spec.line}`,
+      status,
+      duration,
+    });
 
     layers.set(project, layer);
   }
@@ -147,6 +169,7 @@ export function aggregateReport(raw: unknown, source: string, projectFilter?: st
     passRate: executed === 0 ? 0 : Math.round((passed / executed) * 1000) / 10,
     layers: [...layers.values()].sort((a, b) => a.project.localeCompare(b.project)),
     failures,
+    cases,
     source,
   };
 }
