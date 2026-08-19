@@ -1,5 +1,5 @@
 /**
- * Catatan Temuan (QA Findings) - BOT PPOB NONA.
+ * Catatan Temuan (QA Findings) - BOT PPOB NONA & BOT BA (Biller Aggregator).
  *
  * File ini adalah sumber data temuan yang di-render otomatis ke section
  * "Catatan Temuan" pada laporan PDF. Setiap temuan baru TAMBAHKAN di sini
@@ -81,5 +81,45 @@ export const FINDINGS: Finding[] = [
     title: 'Tambah Settlement mengarah ke halaman create baru (bukan dialog)',
     detail:
       'Tombol "Tambah" di Settlement PSP/Biller berpindah ke halaman baru `.../create` dengan form 2 langkah (Pilih Recon Header -> Data Settlement). Test membuka halaman lalu Batal tanpa mengisi data.',
+  },
+  {
+    id: 'BA-001',
+    category: 'BUG',
+    status: 'OPEN',
+    title: 'Pencarian Master Bank selalu "Tidak ada data"',
+    detail:
+      'Kolom "Cari Bank..." di webview BA (playground) mengembalikan "Tidak ada data" untuk query apa pun, termasuk kode/nama bank yang jelas ada di tabel. Akibatnya test memakai scan tabel (search dikosongkan) sebagai pengganti cek data.',
+  },
+  {
+    id: 'BA-002',
+    category: 'BUG',
+    status: 'OPEN',
+    title: 'Dialog konfirmasi hapus Bank & Rekening Topup menyebut "provider"',
+    detail:
+      'Konfirmasi hapus Master Bank dan Topup Bank Account menampilkan teks "Apakah Anda yakin ingin menghapus provider ini?" — kemungkinan copy-paste dari halaman Billing Provider.',
+  },
+  {
+    id: 'BA-003',
+    category: 'BUG',
+    status: 'OPEN',
+    title: 'Hapus Menu ditolak 403 "Anda tidak memiliki izin"',
+    detail:
+      'DELETE /api/v1/master/menu/delete?id=... selalu 403 "Anda tidak memiliki izin untuk mengakses halaman atau action ini" untuk user Super Admin sekalipun. Test hapus menu memverifikasi pesan 403 tampil dan baris tetap ada. Perlu konfirmasi ke dev apakah ini by-design atau bug permission.',
+  },
+  {
+    id: 'BA-004',
+    category: 'NOTE',
+    status: 'INFO',
+    title: 'Mitra tidak punya fitur hapus (hanya Aktifkan/Nonaktifkan)',
+    detail:
+      'Menu baris Mitra hanya menyediakan Detail/Ubah, Top Up, Riwayat, Product Pricing, Credential, dan Aktifkan/Nonaktifkan. Tidak ada opsi hapus; test CRUD Mitra menggantikan delete dengan toggle status + verifikasi duplikat kode.',
+  },
+  {
+    id: 'BA-005',
+    category: 'BUG',
+    status: 'OPEN',
+    title: 'Duplikat nama Role dikembalikan sebagai HTTP 500',
+    detail:
+      'POST /api/v1/master/role/add dengan nama yang sudah ada mengembalikan 500 "Nama role sudah digunakan" (bukan 4xx seperti menu lain yang memakai 400). Test duplikat tetap lolos karena pesan error tampil di UI, tapi status code-nya perlu dibenahi.',
   },
 ];
