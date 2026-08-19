@@ -112,7 +112,7 @@ function findingRows(): string {
       <td class="case-meta">${f.id}</td>
       <td>${findingBadge(f.category)} ${findingStatus(f.status)}</td>
       <td class="case-title">${escapeHtml(f.title)}</td>
-      <td>${escapeHtml(f.detail)}</td>
+      <td>${escapeHtml(f.detail)}${f.url ? `<br/><span class="case-url">${escapeHtml(f.url)}</span>` : ''}</td>
     </tr>`,
   )
     .join('');
@@ -203,6 +203,7 @@ export function renderReport(aggregate: AggregateReport): string {
   .case-status { white-space: nowrap; }
   .case-title { font-weight: 600; }
   .case-meta { color: #7b8794; font-size: 10px; white-space: nowrap; }
+  .case-url { font-family: monospace; font-size: 10px; color: #2b6cb0; word-break: break-all; }
   .footer { margin-top: 28px; border-top: 1px solid #e4e7eb; padding-top: 8px; font-size: 10px; color: #7b8794; }
   @media print {
     body { padding: 0; }

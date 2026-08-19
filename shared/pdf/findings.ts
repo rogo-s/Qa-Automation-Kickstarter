@@ -4,6 +4,9 @@
  * File ini adalah sumber data temuan yang di-render otomatis ke section
  * "Catatan Temuan" pada laporan PDF. Setiap temuan baru TAMBAHKAN di sini
  * supaya tercatat konsisten di setiap laporan.
+ *
+ * Field `url` berisi halaman/endpoint terkait agar developer bisa langsung
+ * menuju titik yang bermasalah (opsional, dirender di bawah detail).
  */
 
 export type FindingCategory = 'BUG' | 'CHANGE' | 'DATA' | 'INFRA' | 'NOTE';
@@ -15,7 +18,12 @@ export type Finding = {
   status: FindingStatus;
   title: string;
   detail: string;
+  url?: string;
 };
+
+const BA_BASE = 'https://biller-dashboard-internal-playground.lentera-app.id';
+const NONA_BASE = 'https://backoffice-ppob-nona-webview-playground.lentera-app.id';
+const PORTAL_BASE = 'https://iconnet-portal-backoffice-playground.lentera-app.id';
 
 export const FINDINGS: Finding[] = [
   {
@@ -57,6 +65,7 @@ export const FINDINGS: Finding[] = [
     title: 'ERR_CONNECTION_REFUSED transien di master-data Cutoff',
     detail:
       'Saat full run, test tambah Cutoff gagal karena koneksi ditolak ke host portal (iconnet-portal-backoffice-playground). Bukan bug test; lulus saat di-retry. Terindikasi flaky infrastruktur sesaat.',
+    url: PORTAL_BASE,
   },
   {
     id: 'NONA-006',
@@ -65,6 +74,7 @@ export const FINDINGS: Finding[] = [
     title: 'Rute halaman lanjutan tidak bisa di-goto langsung (404)',
     detail:
       'Halaman Transactions, Rekonsiliasi, dan Settlement hanya bisa dibuka lewat klik link sidebar; direct page.goto mengembalikan "Halaman Tidak Ditemukan". Page object memakai navigasi via sidebar.',
+    url: `${NONA_BASE}/transactions/monitoring (contoh rute: /transactions/recap, /reconciliation/data-gateway, /settlement/payment-service-provider, /settlement/biller)`,
   },
   {
     id: 'NONA-007',
@@ -81,6 +91,7 @@ export const FINDINGS: Finding[] = [
     title: 'Tambah Settlement mengarah ke halaman create baru (bukan dialog)',
     detail:
       'Tombol "Tambah" di Settlement PSP/Biller berpindah ke halaman baru `.../create` dengan form 2 langkah (Pilih Recon Header -> Data Settlement). Test membuka halaman lalu Batal tanpa mengisi data.',
+    url: `${NONA_BASE}/settlement/biller/create`,
   },
   {
     id: 'BA-001',
@@ -89,6 +100,7 @@ export const FINDINGS: Finding[] = [
     title: 'Pencarian Master Bank selalu "Tidak ada data"',
     detail:
       'Kolom "Cari Bank..." di webview BA (playground) mengembalikan "Tidak ada data" untuk query apa pun, termasuk kode/nama bank yang jelas ada di tabel. Akibatnya test memakai scan tabel (search dikosongkan) sebagai pengganti cek data.',
+    url: `${BA_BASE}/bank_internal`,
   },
   {
     id: 'BA-002',
@@ -97,6 +109,7 @@ export const FINDINGS: Finding[] = [
     title: 'Dialog konfirmasi hapus Bank & Rekening Topup menyebut "provider"',
     detail:
       'Konfirmasi hapus Master Bank dan Topup Bank Account menampilkan teks "Apakah Anda yakin ingin menghapus provider ini?" — kemungkinan copy-paste dari halaman Billing Provider.',
+    url: `${BA_BASE}/bank_internal dan ${BA_BASE}/topup_bank_account_internal`,
   },
   {
     id: 'BA-003',
@@ -105,6 +118,7 @@ export const FINDINGS: Finding[] = [
     title: 'Hapus Menu ditolak 403 "Anda tidak memiliki izin"',
     detail:
       'DELETE /api/v1/master/menu/delete?id=... selalu 403 "Anda tidak memiliki izin untuk mengakses halaman atau action ini" untuk user Super Admin sekalipun. Test hapus menu memverifikasi pesan 403 tampil dan baris tetap ada. Perlu konfirmasi ke dev apakah ini by-design atau bug permission.',
+    url: `${BA_BASE}/menu_internal — endpoint DELETE ${BA_BASE}/api/v1/master/menu/delete`,
   },
   {
     id: 'BA-004',
@@ -113,6 +127,7 @@ export const FINDINGS: Finding[] = [
     title: 'Mitra tidak punya fitur hapus (hanya Aktifkan/Nonaktifkan)',
     detail:
       'Menu baris Mitra hanya menyediakan Detail/Ubah, Top Up, Riwayat, Product Pricing, Credential, dan Aktifkan/Nonaktifkan. Tidak ada opsi hapus; test CRUD Mitra menggantikan delete dengan toggle status + verifikasi duplikat kode.',
+    url: `${BA_BASE}/mitra_internal`,
   },
   {
     id: 'BA-005',
@@ -121,5 +136,6 @@ export const FINDINGS: Finding[] = [
     title: 'Duplikat nama Role dikembalikan sebagai HTTP 500',
     detail:
       'POST /api/v1/master/role/add dengan nama yang sudah ada mengembalikan 500 "Nama role sudah digunakan" (bukan 4xx seperti menu lain yang memakai 400). Test duplikat tetap lolos karena pesan error tampil di UI, tapi status code-nya perlu dibenahi.',
+    url: `${BA_BASE}/manage_role_internal/add — endpoint POST ${BA_BASE}/api/v1/master/role/add`,
   },
 ];
