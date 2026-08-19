@@ -17,7 +17,7 @@ import { config } from './config';
  * di-ignore supaya tidak ikut run project backoffice.
  */
 export default defineConfig({
-  testDir: '.',
+  testDir: './setup',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0, // retry max 1x, hanya di CI (lihat kebijakan maintenance)
@@ -44,7 +44,7 @@ export default defineConfig({
   projects: [
     {
       name: 'setup',
-      testDir: '.',
+      testDir: './setup',
       testMatch: /auth\.setup\.ts/,
       use: {
         baseURL: config.backoffice_base_url,
@@ -53,7 +53,7 @@ export default defineConfig({
     },
     {
       name: 'setup-webview-nona',
-      testDir: '.',
+      testDir: './setup',
       testMatch: /auth\.webview-nona\.setup\.ts/,
       use: {
         baseURL: config.ppob_nona_webview_base_url,

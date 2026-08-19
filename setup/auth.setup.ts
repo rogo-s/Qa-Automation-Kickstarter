@@ -1,6 +1,6 @@
 import { test as setup, expect } from '@playwright/test';
-import usersData from './shared/test-data/users.json';
-import backofficeData from './shared/test-data/backoffice.json';
+import usersData from '../shared/test-data/users.json';
+import backofficeData from '../shared/test-data/backoffice.json';
 
 const admin = usersData.backoffice.admin;
 const data = backofficeData.login;

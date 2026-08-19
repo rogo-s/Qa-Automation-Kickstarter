@@ -1,5 +1,5 @@
 import { test as setup, expect } from '@playwright/test';
-import { config } from './config';
+import { config } from '../config';
 
 const WEBVIEW = config.ppob_nona_webview_base_url!;
 
