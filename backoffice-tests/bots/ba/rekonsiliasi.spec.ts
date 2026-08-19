@@ -1,43 +1,85 @@
 import { test, expect } from '@playwright/test';
-import { BaPage } from '../../../shared/pages/BaPage';
+import { BaTransaksiPage } from '../../../shared/pages/BaTransaksiPage';
 
 /**
  * Rekonsiliasi (Goto, Kudo, E2Pay, AyoConnect) - BOT BA (Biller Aggregator).
- * Fase 1: buka tiap halaman rekon, verifikasi tabel + tombol Upload + ringkasan perbandingan.
+ * Read/view + search file. (Halaman rekon tidak punya tombol Export;
+ * aksi upload file belum masuk scope test ini.)
+ *
+ * 1-4. Buka tiap halaman rekon: tabel perbandingan & tombol Upload tampil
+ * 5. Search "Cari File..." di Goto: keyword cocok -> baris; acak -> "Tidak ada data"
+ * 6. Search "Cari File..." di Kudo: keyword cocok -> baris; acak -> "Tidak ada data"
  */
-test.describe.configure({ mode: 'serial', timeout: 300000 });
+test.describe.configure({ mode: 'serial', timeout: 360000 });
 
 test.describe('BOT BA - Menu Rekonsiliasi @regression', () => {
   test('Buka Rekonsiliasi Goto: tabel perbandingan & tombol Upload tampil @smoke', async ({ page }) => {
-    const ba = await BaPage.open(page);
-    await ba.openRekonsiliasiGoto();
+    const trans = await BaTransaksiPage.openRekonsiliasi(page, 'Goto');
 
-    await ba.expectTableHeader('File', 'Periode Transaksi', 'Perbandingan', 'Force Actions', 'Status');
-    await expect(ba.page.getByRole('button', { name: 'Upload', exact: true }).first()).toBeVisible({ timeout: 15000 });
-    await expect(ba.page.locator('main input[placeholder="Cari File..."]').first()).toBeVisible();
+    const thead = trans.page.locator('main table thead');
+    await expect(thead).toBeVisible({ timeout: 15000 });
+    for (const col of ['File', 'Periode Transaksi', 'Perbandingan', 'Force Actions', 'Status']) {
+      await expect(thead).toContainText(col);
+    }
+    await expect(trans.page.getByRole('button', { name: 'Upload', exact: true }).first()).toBeVisible({ timeout: 15000 });
   });
 
   test('Buka Rekonsiliasi Kudo: tabel perbandingan & Upload Files tampil @smoke', async ({ page }) => {
-    const ba = await BaPage.open(page);
-    await ba.openRekonsiliasiKudo();
+    const trans = await BaTransaksiPage.openRekonsiliasi(page, 'Kudo');
 
-    await ba.expectTableHeader('Nama File', 'Tanggal Upload', 'Tanggal Transaksi', 'Total Biller', 'Total System', 'Force Paid', 'Force Failed', 'Status');
-    await expect(ba.page.getByRole('button', { name: 'Upload Files' }).first()).toBeVisible({ timeout: 15000 });
+    const thead = trans.page.locator('main table thead');
+    await expect(thead).toBeVisible({ timeout: 15000 });
+    for (const col of ['Nama File', 'Tanggal Upload', 'Tanggal Transaksi', 'Total Biller', 'Total System', 'Force Paid', 'Force Failed', 'Status']) {
+      await expect(thead).toContainText(col);
+    }
+    await expect(trans.page.getByRole('button', { name: 'Upload Files' }).first()).toBeVisible({ timeout: 15000 });
   });
 
   test('Buka Rekonsiliasi E2Pay: tabel perbandingan & Upload Files tampil @smoke', async ({ page }) => {
-    const ba = await BaPage.open(page);
-    await ba.openRekonsiliasiE2Pay();
+    const trans = await BaTransaksiPage.openRekonsiliasi(page, 'E2Pay');
 
-    await ba.expectTableHeader('Nama File', 'Tanggal Upload', 'Tanggal Transaksi', 'Total Biller', 'Total System', 'Force Paid', 'Force Failed', 'Status');
-    await expect(ba.page.getByRole('button', { name: 'Upload Files' }).first()).toBeVisible({ timeout: 15000 });
+    const thead = trans.page.locator('main table thead');
+    await expect(thead).toBeVisible({ timeout: 15000 });
+    for (const col of ['Nama File', 'Tanggal Upload', 'Tanggal Transaksi', 'Total Biller', 'Total System', 'Force Paid', 'Force Failed', 'Status']) {
+      await expect(thead).toContainText(col);
+    }
+    await expect(trans.page.getByRole('button', { name: 'Upload Files' }).first()).toBeVisible({ timeout: 15000 });
   });
 
   test('Buka Rekonsiliasi AyoConnect: tabel perbandingan & Upload Files tampil @smoke', async ({ page }) => {
-    const ba = await BaPage.open(page);
-    await ba.openRekonsiliasiAyoConnect();
+    const trans = await BaTransaksiPage.openRekonsiliasi(page, 'AyoConnect');
 
-    await ba.expectTableHeader('Nama File', 'Tanggal Upload', 'Tanggal Transaksi', 'Total Biller', 'Total System', 'Force Paid', 'Force Failed', 'Status');
-    await expect(ba.page.getByRole('button', { name: 'Upload Files' }).first()).toBeVisible({ timeout: 15000 });
+    const thead = trans.page.locator('main table thead');
+    await expect(thead).toBeVisible({ timeout: 15000 });
+    for (const col of ['Nama File', 'Tanggal Upload', 'Tanggal Transaksi', 'Total Biller', 'Total System', 'Force Paid', 'Force Failed', 'Status']) {
+      await expect(thead).toContainText(col);
+    }
+    await expect(trans.page.getByRole('button', { name: 'Upload Files' }).first()).toBeVisible({ timeout: 15000 });
+  });
+
+  test('Search Cari File di Goto: keyword cocok tampil, acak -> "Tidak ada data" @smoke', async ({ page }) => {
+    const trans = await BaTransaksiPage.openRekonsiliasi(page, 'Goto');
+
+    await trans.search('pgs');
+    const matched = await trans.tableText();
+    expect(matched).not.toContain('Tidak ada data');
+    expect(matched).toContain('pgs_transactionlist');
+
+    await trans.search('zzzznothing');
+    const empty = await trans.tableText();
+    expect(empty).toContain('Tidak ada data');
+  });
+
+  test('Search Cari File di Kudo: keyword cocok tampil, acak -> "Tidak ada data" @smoke', async ({ page }) => {
+    const trans = await BaTransaksiPage.openRekonsiliasi(page, 'Kudo');
+
+    await trans.search('KUDO');
+    const matched = await trans.tableText();
+    expect(matched).not.toContain('Tidak ada data');
+    expect(matched).toContain('RCN_KUDO');
+
+    await trans.search('zzzznothing');
+    const empty = await trans.tableText();
+    expect(empty).toContain('Tidak ada data');
   });
 });

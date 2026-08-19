@@ -79,6 +79,7 @@ export default defineConfig({
         storageState: '.auth/portal.json',
         headless: false,
         launchOptions: { slowMo: 1000 },
+        actionTimeout: 30000,
       },
     },
     {

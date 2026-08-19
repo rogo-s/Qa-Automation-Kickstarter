@@ -138,4 +138,13 @@ export const FINDINGS: Finding[] = [
       'POST /api/v1/master/role/add dengan nama yang sudah ada mengembalikan 500 "Nama role sudah digunakan" (bukan 4xx seperti menu lain yang memakai 400). Test duplikat tetap lolos karena pesan error tampil di UI, tapi status code-nya perlu dibenahi.',
     url: `${BA_BASE}/manage_role_internal/add — endpoint POST ${BA_BASE}/api/v1/master/role/add`,
   },
+  {
+    id: 'BA-006',
+    category: 'NOTE',
+    status: 'INFO',
+    title: 'Picker "Pilih product" di dialog Fee Pricing me-disable produk yang sudah punya pricing',
+    detail:
+      'Pada dialog "Tambahkan Fee Pricing" (sub-menu Product Pricing), semua produk yang sudah punya pricing untuk mitra tersebut tampil disabled. Saat semua produk sudah ter-price, tidak ada opsi yang bisa dipilih (perlu produk baru tanpa pricing). Selain itu field Harga disabled untuk produk tipe BILLING (konsisten dengan Manage Product).',
+    url: `${BA_BASE}/mitra_internal/product-pricing/<id>`,
+  },
 ];

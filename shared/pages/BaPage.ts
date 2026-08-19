@@ -58,14 +58,14 @@ export class BaPage {
 
   private static async openOnce(portalPage: Page): Promise<BaPage> {
     await portalPage.goto('/');
-    await portalPage.waitForLoadState('domcontentloaded');
+    await portalPage.waitForLoadState('domcontentloaded', { timeout: 30000 });
     await portalPage.getByText('Pilih BOT Anda').waitFor({ state: 'visible', timeout: 15000 });
     const card = portalPage.locator('div.p-4.border.rounded-lg', { hasText: 'Biller Aggregator' }).first();
     await expect(card).toBeVisible({ timeout: 15000 });
     const popupPromise = portalPage.waitForEvent('popup', { timeout: 20000 });
     await card.getByRole('button', { name: 'Masuk' }).click();
     const webview = await popupPromise;
-    await webview.waitForLoadState('domcontentloaded');
+    await webview.waitForLoadState('domcontentloaded', { timeout: 30000 });
     // Popup mendarat di /sso/callback?jwt_token=... lalu di-redirect ke dashboard.
     await webview.waitForURL(/biller-dashboard-internal-playground\.lentera-app\.id\/dashboard_internal/, {
       timeout: 30000,
@@ -100,7 +100,7 @@ export class BaPage {
     await link.click();
     await this.page.waitForTimeout(1500);
     await expect(this.page.getByRole('heading', { name: heading })).toBeVisible({ timeout: 15000 });
-    await this.page.waitForLoadState('networkidle').catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
   }
 
   // ---------- SHARED ----------
