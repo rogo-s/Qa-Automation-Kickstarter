@@ -93,6 +93,11 @@ export default defineConfig({
         storageState: '.auth/webview-nona.json',
         headless: false,
         launchOptions: { slowMo: 1000 },
+        extraHTTPHeaders: {
+          'X-DEVICE-ID': 's5e8855',
+          'X-LATITUDE': '-6.175392',
+          'X-LONGITUDE': '106.827153',
+        },
       },
     },
     {

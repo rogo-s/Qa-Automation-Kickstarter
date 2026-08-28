@@ -147,4 +147,30 @@ export const FINDINGS: Finding[] = [
       'Pada dialog "Tambahkan Fee Pricing" (sub-menu Product Pricing), semua produk yang sudah punya pricing untuk mitra tersebut tampil disabled. Saat semua produk sudah ter-price, tidak ada opsi yang bisa dipilih (perlu produk baru tanpa pricing). Selain itu field Harga disabled untuk produk tipe BILLING (konsisten dengan Manage Product).',
     url: `${BA_BASE}/mitra_internal/product-pricing/<id>`,
   },
+  {
+    id: 'NONA-009',
+    category: 'NOTE',
+    status: 'INFO',
+    title: 'Webview NONA butuh header validasi X-DEVICE-ID / X-LATITUDE / X-LONGITUDE (HeaderMod)',
+    detail:
+      'Semua request webview transaksi (prepaid/postpaid/history di ppob-nona-webview-playground) wajib kirim X-DEVICE-ID=s5e8855, X-LATITUDE=-6.175392, X-LONGITUDE=106.827153. Tanpa header, API inquiry/payment mengembalikan validasi gagal. Manual via HeaderMod extension; automation via extraHTTPHeaders di playwright.config.ts (project webview-nona + setup-webview-nona) dan page.route fallback. Sudah diimplement di config dan setup/auth.webview-nona.setup.ts.',
+    url: 'https://ppob-nona-webview-playground.lentera-app.id/prepaid',
+  },
+  {
+    id: 'NONA-010',
+    category: 'INFRA',
+    status: 'MONITORED',
+    title: 'Login webview NONA flaky: captcha span detached & skeleton loading',
+    detail:
+      'Setup webview (rendi.nona@yopmail.com) kadang gagal di step captcha "Lakukan perintah captcha dengan benar" — span <span>r</span> detached setelah navigasi + skeleton [data-slot="skeleton"] masih animasi. Playwright log: waiting for element to be stable → detached from DOM. Sudah di-mitigasi dengan waitFor hidden skeleton + force click + retry + setup.setTimeout 120s, tapi masih flaky di CI headless. Workaround: retry 5x, atau jalankan headed. Jika tetap gagal, webview test di-skip (6 tests) dan dicatat di laporan.',
+    url: 'https://ppob-nona-webview-playground.lentera-app.id/login',
+  },
+  {
+    id: 'NONA-011',
+    category: 'BUG',
+    status: 'OPEN',
+    title: 'Prepaid webview tidak jalan jika setup gagal — 6 tests did not run',
+    detail:
+      'Saat setup-webview-nona timeout (30s → 120s), 6 tests webview (prepaid 2, postpaid 2, history 2) tidak ke-run (did not run). Bukan bug produk, tapi infra test. Solusi: jalankan ulang isolated webview-nona atau pakai storageState cache .auth/webview-nona.json yang masih valid dari run sebelumnya. Laporan PDF tetap menampilkan coverage backoffice NONA (41/82) tanpa webview.',
+  },
 ];
