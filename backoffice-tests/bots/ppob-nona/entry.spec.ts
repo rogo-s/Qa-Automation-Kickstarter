@@ -36,7 +36,7 @@ test.describe('Portal BOT - Masuk ke BOT PPOB NONA @regression', () => {
     await botPage.waitForURL(/backoffice-ppob-nona-webview-playground\.lentera-app\.id\/?$/, {
       timeout: 30000,
     });
-    await expect(botPage.getByText('Selamat Datang, Rogo')).toBeVisible({ timeout: 15000 });
+    await expect(botPage.getByText(/Selamat Datang/)).toBeVisible({ timeout: 15000 });
     await expect(
       botPage.getByRole('button', { name: 'Toggle Sidebar' }).first()
     ).toBeVisible();

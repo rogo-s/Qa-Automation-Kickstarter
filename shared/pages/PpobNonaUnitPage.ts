@@ -4,12 +4,13 @@ import { Page, Locator, expect } from '@playwright/test';
  * Page Object - Master Data Unit pada webview BOT PPOB NONA.
  * Halaman dibuka lewat popup (klik "Masuk" BOT PPOB NONA di portal).
  *
- * Karakteristik menu Unit:
+ * Karakteristik menu Unit (update 28-08-2026 probe: tambah Lokasi + Gunakan Lokasi Saya):
  *  - Heading h2 "Daftar Unit" (bukan h1).
  *  - Ada pencarian (input#search "Cari Unit..."), tombol "Tambah Unit".
  *    TIDAK ada tombol Filter & row action hanya "Hapus" (tidak ada "Ubah").
  *  - Form Tambah INLINE: field code (Kode Unit), name (Nama Unit),
- *    address (textarea Alamat), switch Status default checked.
+ *    address (textarea Alamat), Lokasi (leaflet map + button "📍 Gunakan Lokasi Saya"),
+ *    switch Status default checked. Simpan disabled sampai lokasi terisi (geolocation).
  *  - Hapus via dialog "Apakah Anda yakin ingin menghapus unit ini?" (Batal/Lanjutkan).
  *    Delete langsung berhasil meski status masih Aktif.
  */
@@ -21,6 +22,7 @@ export class PpobNonaUnitPage {
   readonly addUnitButton: Locator;
   readonly saveButton: Locator;
   readonly statusSwitch: Locator;
+  readonly useMyLocationButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -28,6 +30,7 @@ export class PpobNonaUnitPage {
     this.addUnitButton = page.getByRole('button', { name: 'Tambah Unit' });
     this.saveButton = page.locator('form button[type="submit"]');
     this.statusSwitch = page.locator('form [role="switch"]');
+    this.useMyLocationButton = page.getByRole('button', { name: /Gunakan Lokasi Saya/ });
   }
 
   /** Buka webview BOT PPOB NONA lalu arahkan ke halaman Master Unit. */
@@ -104,6 +107,18 @@ export class PpobNonaUnitPage {
     if (data.name !== undefined) await this.form().locator('input[name="name"]').fill(data.name);
     if (data.address !== undefined) await this.form().locator('textarea[name="address"]').fill(data.address);
     await this.page.waitForTimeout(500);
+  }
+
+  /** Klik "📍 Gunakan Lokasi Saya" untuk mengisi Lokasi via geolocation (perlu grant permission di test). */
+  async clickUseMyLocation() {
+    await this.useMyLocationButton.click();
+    await this.page.waitForTimeout(1500);
+  }
+
+  async hasLocation(): Promise<boolean> {
+    // map leaflet marker muncul atau Simpan jadi enabled setelah lokasi terisi
+    const hasMarker = (await this.page.locator('.leaflet-marker-icon').count()) > 0;
+    return hasMarker;
   }
 
   isSaveDisabled(): Promise<boolean> {
