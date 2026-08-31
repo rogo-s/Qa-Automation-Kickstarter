@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { MiniappMasterPage } from '../../../shared/pages/MiniappMasterPage';
+import { MiniappMasterPage } from '../../../../shared/pages/MiniappMasterPage';
 
 /**
  * Master Bank - BOT MINIAPP (popup, Master group expand):

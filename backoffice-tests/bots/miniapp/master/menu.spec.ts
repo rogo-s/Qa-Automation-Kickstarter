@@ -1,24 +1,24 @@
 import { test, expect } from '@playwright/test';
-import { MiniappMasterPage } from '../../../shared/pages/MiniappMasterPage';
+import { MiniappMasterPage } from '../../../../shared/pages/MiniappMasterPage';
 
 /**
- * Master Produk Microsite - BOT MINIAPP (popup, Master group expand):
- * Probe direct goto 28-08-2026: heading "Produk Microsite", tambah {"ada" if hasAdd else "tidak ada"}, search "", menu Ubah
+ * Master Menu - BOT MINIAPP (popup, Master group expand):
+ * Probe direct goto 28-08-2026: heading "Menu", tambah {"ada" if hasAdd else "tidak ada"}, search "Cari Menu", menu Ubah|Hapus
  * Pola: view/search → validasi → ADD (search dulu kalau tidak ada → add → hasRow → delete cleanup) → Edit → Delete
  * Error tidak di-fix, hanya catat [TEMUAN] — biar tidak sampah, dummy dihapus lagi.
  */
 test.describe.configure({ mode: 'serial', timeout: 240000 });
 
-test.describe('BOT MINIAPP - Master Produk Microsite @regression', () => {
+test.describe('BOT MINIAPP - Master Menu @regression', () => {
 
   test('1. Validasi & search: tabel tampil, validasi Simpan @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'product-microsite');
+    const m = await MiniappMasterPage.open(page, 'menu');
     await expect(m.headingLoc()).toBeVisible();
     await expect(m.table()).toBeVisible();
     // search
     const cntBefore = await m.rowCount();
     expect(cntBefore).toBeGreaterThanOrEqual(0);
-    if ('') {
+    if ('Cari Menu') {
       await m.search('ZZZ_NOT_EXIST_999');
       const cnt0 = await m.rowCount();
       // jika 0 dan ada "Tidak ada data" → valid
@@ -28,25 +28,25 @@ test.describe('BOT MINIAPP - Master Produk Microsite @regression', () => {
     // validasi tambah jika ada
     if (await m.hasAddButton()) {
       await m.openAddForm();
-      await expect(m.isSaveDisabled()).resolves.toBeTruthy().catch(()=> console.log('[TEMUAN] Simpan enabled saat kosong product-microsite'));
+      await expect(m.isSaveDisabled()).resolves.toBeTruthy().catch(()=> console.log('[TEMUAN] Simpan enabled saat kosong menu'));
       // negative: isi code dengan simbol
       await m.fillFormByPlaceholder({code: '!@#'});
       const dis2 = await m.isSaveDisabled();
       if (!dis2) console.log('[TEMUAN] Simpan enabled dengan code simbol !@# — seharusnya validasi');
       await m.cancelAdd();
     } else {
-      console.log('[INFO] product-microsite tidak ada Tambah — view only, skip validasi add');
+      console.log('[INFO] menu tidak ada Tambah — view only, skip validasi add');
     }
   });
 
   test('2. View: search & tabel tampil, tidak ada Tambah (view-only) @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'product-microsite');
+    const m = await MiniappMasterPage.open(page, 'menu');
     await expect(m.headingLoc()).toBeVisible();
     await expect(m.table()).toBeVisible();
     const cnt = await m.rowCount();
     expect(cnt).toBeGreaterThan(0);
     // search
-    if ('') {
+    if ('Cari Menu') {
       await m.search('BCA');
       const c2 = await m.rowCount();
       console.log('[INFO] search BCA rows', c2);
@@ -57,13 +57,13 @@ test.describe('BOT MINIAPP - Master Produk Microsite @regression', () => {
   });
 
   test('3. Edit: search kalau ada → ubah lalu verifikasi @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'product-microsite');
+    const m = await MiniappMasterPage.open(page, 'menu');
     const row = m.page.locator('main tbody tr').first();
     const firstText = await row.innerText().catch(()=> '');
-    if (!firstText.trim()) { console.log('[TEMUAN] Tidak ada row untuk edit product-microsite'); return; }
+    if (!firstText.trim()) { console.log('[TEMUAN] Tidak ada row untuk edit menu'); return; }
     // ambil kode/name pertama sebagai keyword
     const keyword = firstText.split('\n')[1]?.trim().split(' ')[0] || firstText.trim().split(' ')[0];
-    await m.openRowMenu(keyword).catch(()=> console.log('[TEMUAN] Open menu gagal product-microsite'));
+    await m.openRowMenu(keyword).catch(()=> console.log('[TEMUAN] Open menu gagal menu'));
     const menu = m.page.getByRole('menu');
     if (await menu.isVisible().catch(()=>false)) {
       const hasUbah = await m.page.getByRole('menuitem', {name: /Ubah|Edit/}).count();
@@ -77,7 +77,7 @@ test.describe('BOT MINIAPP - Master Produk Microsite @regression', () => {
           const input = form.locator('input[name="name"], input[name="title"], input[name="fullName"]').first();
           if (await input.count()>0) {
             await input.fill('QA EDIT ' + Date.now().toString().slice(-4));
-            await m.save().catch(()=> console.log('[TEMUAN] Save edit gagal product-microsite'));
+            await m.save().catch(()=> console.log('[TEMUAN] Save edit gagal menu'));
           } else {
             await m.cancelAdd();
           }
@@ -90,7 +90,7 @@ test.describe('BOT MINIAPP - Master Produk Microsite @regression', () => {
     }
   });
   test('4. Delete cleanup: jika ada Tambah, sudah dihapus di test 2; untuk view-only cek Hapus tersedia @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'product-microsite');
+    const m = await MiniappMasterPage.open(page, 'menu');
     // cek menu Hapus ada
     const row = m.page.locator('main tbody tr').first();
     const txt = await row.innerText().catch(()=> '');
@@ -98,7 +98,7 @@ test.describe('BOT MINIAPP - Master Produk Microsite @regression', () => {
     const kw = txt.split('\n')[1]?.trim().split(' ')[0] || txt.trim().split(' ')[0];
     await m.openRowMenu(kw).catch(()=>{});
     const hasHapus = await m.page.getByRole('menuitem', {name: /Hapus/}).count();
-    console.log('[INFO] Hapus menu count for product-microsite', hasHapus);
+    console.log('[INFO] Hapus menu count for menu', hasHapus);
     await m.page.keyboard.press('Escape');
     // tidak hapus real data existing (hanya dummy dari test 2 sudah cleanup)
   });

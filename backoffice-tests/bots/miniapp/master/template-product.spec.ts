@@ -1,24 +1,24 @@
 import { test, expect } from '@playwright/test';
-import { MiniappMasterPage } from '../../../shared/pages/MiniappMasterPage';
+import { MiniappMasterPage } from '../../../../shared/pages/MiniappMasterPage';
 
 /**
- * Master Nomor Prefix - BOT MINIAPP (popup, Master group expand):
- * Probe direct goto 28-08-2026: heading "Nomor Prefix", tambah {"ada" if hasAdd else "tidak ada"}, search "Cari Awalan Nomor", menu Ubah|Hapus
+ * Master Template - BOT MINIAPP (popup, Master group expand):
+ * Probe direct goto 28-08-2026: heading "Template", tambah {"ada" if hasAdd else "tidak ada"}, search "", menu Ubah|Hapus
  * Pola: view/search → validasi → ADD (search dulu kalau tidak ada → add → hasRow → delete cleanup) → Edit → Delete
  * Error tidak di-fix, hanya catat [TEMUAN] — biar tidak sampah, dummy dihapus lagi.
  */
 test.describe.configure({ mode: 'serial', timeout: 240000 });
 
-test.describe('BOT MINIAPP - Master Nomor Prefix @regression', () => {
+test.describe('BOT MINIAPP - Master Template @regression', () => {
 
   test('1. Validasi & search: tabel tampil, validasi Simpan @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'prefix-number');
+    const m = await MiniappMasterPage.open(page, 'template-product');
     await expect(m.headingLoc()).toBeVisible();
     await expect(m.table()).toBeVisible();
     // search
     const cntBefore = await m.rowCount();
     expect(cntBefore).toBeGreaterThanOrEqual(0);
-    if ('Cari Awalan Nomor') {
+    if ('') {
       await m.search('ZZZ_NOT_EXIST_999');
       const cnt0 = await m.rowCount();
       // jika 0 dan ada "Tidak ada data" → valid
@@ -28,51 +28,42 @@ test.describe('BOT MINIAPP - Master Nomor Prefix @regression', () => {
     // validasi tambah jika ada
     if (await m.hasAddButton()) {
       await m.openAddForm();
-      await expect(m.isSaveDisabled()).resolves.toBeTruthy().catch(()=> console.log('[TEMUAN] Simpan enabled saat kosong prefix-number'));
+      await expect(m.isSaveDisabled()).resolves.toBeTruthy().catch(()=> console.log('[TEMUAN] Simpan enabled saat kosong template-product'));
       // negative: isi code dengan simbol
       await m.fillFormByPlaceholder({code: '!@#'});
       const dis2 = await m.isSaveDisabled();
       if (!dis2) console.log('[TEMUAN] Simpan enabled dengan code simbol !@# — seharusnya validasi');
       await m.cancelAdd();
     } else {
-      console.log('[INFO] prefix-number tidak ada Tambah — view only, skip validasi add');
+      console.log('[INFO] template-product tidak ada Tambah — view only, skip validasi add');
     }
   });
 
-  test('2. ADD: search dulu kalau tidak ada → tambah lalu verifikasi & cleanup @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'prefix-number');
-    const uniq = Date.now().toString().slice(-6);
-    const code = 'QAPREFIX' + uniq;
-    // search dulu
-    if (await m.hasRow(code)) {
-      await expect(m.rowFor(code)).toBeVisible();
-    } else {
-      await m.openAddForm();
-      // validasi: Simpan disabled sampai terisi
-      await expect(m.isSaveDisabled()).resolves.toBeTruthy();
-      // isi field minimal (probe formFields) — pakai generic fill
-      await m.fillFormByPlaceholder({ code, name: code });
-      // jika masih disabled catat TEMUAN (bukan fail)
-      const disabled = await m.isSaveDisabled();
-      if (disabled) console.log('[TEMUAN] {heading} Simpan masih disabled setelah fill — cek required');
-      await m.save().catch(() => console.log('[TEMUAN] Save gagal — validasi backend'));
-      await expect(m.hasRow(code)).resolves.toBeTruthy().catch(()=> console.log('[TEMUAN] Row tidak muncul setelah add'));
+  test('2. View: search & tabel tampil, tidak ada Tambah (view-only) @smoke', async ({ page }) => {
+    const m = await MiniappMasterPage.open(page, 'template-product');
+    await expect(m.headingLoc()).toBeVisible();
+    await expect(m.table()).toBeVisible();
+    const cnt = await m.rowCount();
+    expect(cnt).toBeGreaterThan(0);
+    // search
+    if ('') {
+      await m.search('BCA');
+      const c2 = await m.rowCount();
+      console.log('[INFO] search BCA rows', c2);
+      await m.search('');
     }
-    // cleanup: hapus lagi biar tidak sampah
-    if (await m.hasRow(code)) {
-      await m.deleteRow(code).catch(()=> console.log('[TEMUAN] Delete gagal'));
-      await expect(m.hasRow(code)).resolves.toBeFalsy();
-    }
+    // hasAdd false — catat sebagai notes view-only
+    expect(await m.hasAddButton()).toBeFalsy();
   });
 
   test('3. Edit: search kalau ada → ubah lalu verifikasi @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'prefix-number');
+    const m = await MiniappMasterPage.open(page, 'template-product');
     const row = m.page.locator('main tbody tr').first();
     const firstText = await row.innerText().catch(()=> '');
-    if (!firstText.trim()) { console.log('[TEMUAN] Tidak ada row untuk edit prefix-number'); return; }
+    if (!firstText.trim()) { console.log('[TEMUAN] Tidak ada row untuk edit template-product'); return; }
     // ambil kode/name pertama sebagai keyword
     const keyword = firstText.split('\n')[1]?.trim().split(' ')[0] || firstText.trim().split(' ')[0];
-    await m.openRowMenu(keyword).catch(()=> console.log('[TEMUAN] Open menu gagal prefix-number'));
+    await m.openRowMenu(keyword).catch(()=> console.log('[TEMUAN] Open menu gagal template-product'));
     const menu = m.page.getByRole('menu');
     if (await menu.isVisible().catch(()=>false)) {
       const hasUbah = await m.page.getByRole('menuitem', {name: /Ubah|Edit/}).count();
@@ -86,7 +77,7 @@ test.describe('BOT MINIAPP - Master Nomor Prefix @regression', () => {
           const input = form.locator('input[name="name"], input[name="title"], input[name="fullName"]').first();
           if (await input.count()>0) {
             await input.fill('QA EDIT ' + Date.now().toString().slice(-4));
-            await m.save().catch(()=> console.log('[TEMUAN] Save edit gagal prefix-number'));
+            await m.save().catch(()=> console.log('[TEMUAN] Save edit gagal template-product'));
           } else {
             await m.cancelAdd();
           }
@@ -99,7 +90,7 @@ test.describe('BOT MINIAPP - Master Nomor Prefix @regression', () => {
     }
   });
   test('4. Delete cleanup: jika ada Tambah, sudah dihapus di test 2; untuk view-only cek Hapus tersedia @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'prefix-number');
+    const m = await MiniappMasterPage.open(page, 'template-product');
     // cek menu Hapus ada
     const row = m.page.locator('main tbody tr').first();
     const txt = await row.innerText().catch(()=> '');
@@ -107,7 +98,7 @@ test.describe('BOT MINIAPP - Master Nomor Prefix @regression', () => {
     const kw = txt.split('\n')[1]?.trim().split(' ')[0] || txt.trim().split(' ')[0];
     await m.openRowMenu(kw).catch(()=>{});
     const hasHapus = await m.page.getByRole('menuitem', {name: /Hapus/}).count();
-    console.log('[INFO] Hapus menu count for prefix-number', hasHapus);
+    console.log('[INFO] Hapus menu count for template-product', hasHapus);
     await m.page.keyboard.press('Escape');
     // tidak hapus real data existing (hanya dummy dari test 2 sudah cleanup)
   });

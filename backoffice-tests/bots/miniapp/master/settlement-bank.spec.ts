@@ -1,24 +1,24 @@
 import { test, expect } from '@playwright/test';
-import { MiniappMasterPage } from '../../../shared/pages/MiniappMasterPage';
+import { MiniappMasterPage } from '../../../../shared/pages/MiniappMasterPage';
 
 /**
- * Master Role - BOT MINIAPP (popup, Master group expand):
- * Probe direct goto 28-08-2026: heading "Role", tambah {"ada" if hasAdd else "tidak ada"}, search "Cari Role", menu Ubah|Hapus
+ * Master Settlement Bank - BOT MINIAPP (popup, Master group expand):
+ * Probe direct goto 28-08-2026: heading "Settlement Bank", tambah {"ada" if hasAdd else "tidak ada"}, search "Cari settlement", menu Edit|Hapus
  * Pola: view/search → validasi → ADD (search dulu kalau tidak ada → add → hasRow → delete cleanup) → Edit → Delete
  * Error tidak di-fix, hanya catat [TEMUAN] — biar tidak sampah, dummy dihapus lagi.
  */
 test.describe.configure({ mode: 'serial', timeout: 240000 });
 
-test.describe('BOT MINIAPP - Master Role @regression', () => {
+test.describe('BOT MINIAPP - Master Settlement Bank @regression', () => {
 
   test('1. Validasi & search: tabel tampil, validasi Simpan @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'role');
+    const m = await MiniappMasterPage.open(page, 'settlement-bank');
     await expect(m.headingLoc()).toBeVisible();
     await expect(m.table()).toBeVisible();
     // search
     const cntBefore = await m.rowCount();
     expect(cntBefore).toBeGreaterThanOrEqual(0);
-    if ('Cari Role') {
+    if ('Cari settlement') {
       await m.search('ZZZ_NOT_EXIST_999');
       const cnt0 = await m.rowCount();
       // jika 0 dan ada "Tidak ada data" → valid
@@ -28,25 +28,25 @@ test.describe('BOT MINIAPP - Master Role @regression', () => {
     // validasi tambah jika ada
     if (await m.hasAddButton()) {
       await m.openAddForm();
-      await expect(m.isSaveDisabled()).resolves.toBeTruthy().catch(()=> console.log('[TEMUAN] Simpan enabled saat kosong role'));
+      await expect(m.isSaveDisabled()).resolves.toBeTruthy().catch(()=> console.log('[TEMUAN] Simpan enabled saat kosong settlement-bank'));
       // negative: isi code dengan simbol
       await m.fillFormByPlaceholder({code: '!@#'});
       const dis2 = await m.isSaveDisabled();
       if (!dis2) console.log('[TEMUAN] Simpan enabled dengan code simbol !@# — seharusnya validasi');
       await m.cancelAdd();
     } else {
-      console.log('[INFO] role tidak ada Tambah — view only, skip validasi add');
+      console.log('[INFO] settlement-bank tidak ada Tambah — view only, skip validasi add');
     }
   });
 
   test('2. View: search & tabel tampil, tidak ada Tambah (view-only) @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'role');
+    const m = await MiniappMasterPage.open(page, 'settlement-bank');
     await expect(m.headingLoc()).toBeVisible();
     await expect(m.table()).toBeVisible();
     const cnt = await m.rowCount();
     expect(cnt).toBeGreaterThan(0);
     // search
-    if ('Cari Role') {
+    if ('Cari settlement') {
       await m.search('BCA');
       const c2 = await m.rowCount();
       console.log('[INFO] search BCA rows', c2);
@@ -57,13 +57,13 @@ test.describe('BOT MINIAPP - Master Role @regression', () => {
   });
 
   test('3. Edit: search kalau ada → ubah lalu verifikasi @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'role');
+    const m = await MiniappMasterPage.open(page, 'settlement-bank');
     const row = m.page.locator('main tbody tr').first();
     const firstText = await row.innerText().catch(()=> '');
-    if (!firstText.trim()) { console.log('[TEMUAN] Tidak ada row untuk edit role'); return; }
+    if (!firstText.trim()) { console.log('[TEMUAN] Tidak ada row untuk edit settlement-bank'); return; }
     // ambil kode/name pertama sebagai keyword
     const keyword = firstText.split('\n')[1]?.trim().split(' ')[0] || firstText.trim().split(' ')[0];
-    await m.openRowMenu(keyword).catch(()=> console.log('[TEMUAN] Open menu gagal role'));
+    await m.openRowMenu(keyword).catch(()=> console.log('[TEMUAN] Open menu gagal settlement-bank'));
     const menu = m.page.getByRole('menu');
     if (await menu.isVisible().catch(()=>false)) {
       const hasUbah = await m.page.getByRole('menuitem', {name: /Ubah|Edit/}).count();
@@ -77,7 +77,7 @@ test.describe('BOT MINIAPP - Master Role @regression', () => {
           const input = form.locator('input[name="name"], input[name="title"], input[name="fullName"]').first();
           if (await input.count()>0) {
             await input.fill('QA EDIT ' + Date.now().toString().slice(-4));
-            await m.save().catch(()=> console.log('[TEMUAN] Save edit gagal role'));
+            await m.save().catch(()=> console.log('[TEMUAN] Save edit gagal settlement-bank'));
           } else {
             await m.cancelAdd();
           }
@@ -90,7 +90,7 @@ test.describe('BOT MINIAPP - Master Role @regression', () => {
     }
   });
   test('4. Delete cleanup: jika ada Tambah, sudah dihapus di test 2; untuk view-only cek Hapus tersedia @smoke', async ({ page }) => {
-    const m = await MiniappMasterPage.open(page, 'role');
+    const m = await MiniappMasterPage.open(page, 'settlement-bank');
     // cek menu Hapus ada
     const row = m.page.locator('main tbody tr').first();
     const txt = await row.innerText().catch(()=> '');
@@ -98,7 +98,7 @@ test.describe('BOT MINIAPP - Master Role @regression', () => {
     const kw = txt.split('\n')[1]?.trim().split(' ')[0] || txt.trim().split(' ')[0];
     await m.openRowMenu(kw).catch(()=>{});
     const hasHapus = await m.page.getByRole('menuitem', {name: /Hapus/}).count();
-    console.log('[INFO] Hapus menu count for role', hasHapus);
+    console.log('[INFO] Hapus menu count for settlement-bank', hasHapus);
     await m.page.keyboard.press('Escape');
     // tidak hapus real data existing (hanya dummy dari test 2 sudah cleanup)
   });

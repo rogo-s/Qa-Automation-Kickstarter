@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { MiniappMerchantPage, generateDummyPublicKey1024 } from '../../../shared/pages/MiniappMerchantPage';
+import { MiniappMerchantPage, generateDummyPublicKey1024 } from '../../../../shared/pages/MiniappMerchantPage';
 
 /**
  * Merchant Miniapp - onboarding/merchant
