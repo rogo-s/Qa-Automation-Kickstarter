@@ -116,6 +116,8 @@ flowchart TD
 
 **Page Object:** `AdminLoginPage`, `BotSelectorPage`, `BaPage` `shared/pages/AdminLoginPage.ts`, `BotSelectorPage.ts`, `BaPage.ts`
 
+![Portal Login](assets/ba/00-portal-login.png)
+
 ---
 
 ## 5. Roles & Permissions
@@ -209,6 +211,8 @@ flowchart TD
 
 ### 8.1 Dashboard
 
+![Dashboard](assets/ba/01-dashboard.png)
+
 * **Route:** `/dashboard_internal` `DashboardPage` `BaPage`
 * **Fungsi:** Menampilkan `Total Mitra 3, Biller 7, Product 71`, `Ringkasan Hari Ini` `Transaksi Berhasil`, `Distribusi Status/Produk`, `Top 5 Mitra/Product/Biller`
 * **Input Testcase:**
@@ -227,6 +231,8 @@ flowchart TD
 ```
 
 ### 8.2 Bank
+
+![Bank](assets/ba/02-bank.png)
 
 * **Route:** `/bank_internal` `BaBankPage` `heading Bank`
 * **Fungsi:** Mengelola master bank untuk settlement
@@ -255,6 +261,8 @@ flowchart TD
 
 ### 8.3 Billing Provider
 
+![Billing Provider](assets/ba/03-billing-provider.png)
+
 * **Route:** `/billing_provider_internal` `BaBillingProviderPage`
 * **Fungsi:** Mengelola provider biller
 * **Field:** `code, name, ...`
@@ -262,11 +270,15 @@ flowchart TD
 
 ### 8.4 Kategori & Grup
 
+![Kategori & Grup](assets/ba/04-category-group.png)
+
 * **Route:** `/category_group_internal` `BaCategoryGroupPage`
 * **Fungsi:** Kategori `code, name` dan Grup `code, name, kategori`
 * **Testcase:** Kategori 6 tests + Grup 4 tests `validasi, add, edit, status, delete, duplikat` — duplikat `Kode Kategori sudah digunakan`
 
 ### 8.5 Menu
+
+![Menu](assets/ba/05-menu.png)
 
 * **Route:** `/menu_internal` `BaMenuPage`
 * **Fungsi:** Menu sidebar `code, name, icon, parent, description, status, permission`
@@ -292,6 +304,8 @@ flowchart TD
 
 ### 8.6 Mitra
 
+![Mitra](assets/ba/06-mitra.png)
+
 * **Route:** `/mitra_internal` `BaMitraPage`
 * **Fungsi:** Mitra biller
 * **Field:** `code, name, email, phone, address, pic`
@@ -306,6 +320,8 @@ flowchart TD
 
 ### 8.8 Manage Product
 
+![Manage Product](assets/ba/07-manage-product.png)
+
 * **Route:** `/manage_product_internal` `BaProductPage`
 * **Fungsi:** Produk biller
 * **Field:** `code, name, Biaya Admin/Komisi` `AdminFee, CommissionFee tidak boleh kosong` `BA` | `type BILLING → Harga disabled` `BA-006`
@@ -313,26 +329,36 @@ flowchart TD
 
 ### 8.9 Manage Role
 
+![Manage Role](assets/ba/08-manage-role.png)
+
 * **Route:** `/manage_role_internal` `BaRolePage`
 * **Fungsi:** Role `code, name, permission matrix` `minimal memiliki satu akses menu` `BA-005` `500 Nama role sudah digunakan`
 * **Field:** `permission` checkbox `Dashboard/View` 115 checkbox
 
 ### 8.10 Monitoring Transaksi
 
+![Monitoring](assets/ba/09-monitoring.png)
+
 * **Route:** `/monitoring_internal` `BaTransaksiPage`
 * **Fungsi:** Daftar transaksi `Search, Filter status Success, Export XLSX Tahun Ini`
 
 ### 8.11 Rekap Transaksi
+
+![Rekap](assets/ba/10-rekap.png)
 
 * **Route:** `/rekap_internal`
 * **Fungsi:** `Filter Tahun Ini, Export XLSX`
 
 ### 8.12 Rekonsiliasi
 
+![Rekonsiliasi](assets/ba/11-rekonsiliasi-goto.png)
+
 * **Route:** `/rekonsiliasi_goto_internal`, `/rekonsiliasi_kudo_internal`, `/rekonsiliasi_e2pay_internal`, `/rekonsiliasi_ayoconnect_internal`
 * **Fungsi:** Tabel perbandingan `Upload Files`, `Search Cari File`
 
 ### 8.13 Invoice
+
+![Invoice](assets/ba/12-invoice.png)
 
 * **Route:** `/invoice_internal` `BaInvoicePage`
 * **Fungsi:** `Generate` `mitra DIGI01, range bulan berjalan` → `invoice baru ATAU ditolak overlap`, `Konfirmasi Pembayaran: Belum Lunas → Lunas`, `Print`
