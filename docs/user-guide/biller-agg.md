@@ -1,6 +1,6 @@
 # User Guide — BOT Biller Aggregator (BA)
 
-**BOT:** Biller Aggregator | **Base URL:** `https://biller-dashboard-internal-playground.lentera-app.id` | **Portal:** `https://iconnet-portal-backoffice-playground.lentera-app.id` | **Version:** 1.0 | **Date:** 28-08-2026 | **Branch:** `backoffice-tools` `6c28c96` | **Tests:** 91 in 16 files `backoffice-tests/bots/ba --list`
+**BOT:** Biller Aggregator | **Base URL:** `https://biller-dashboard-internal-playground.lentera-app.id` | **Portal:** `https://iconnet-portal-backoffice-playground.lentera-app.id` | **Version:** 1.2 | **Date:** 17-09-2026 | **Branch:** `backoffice-tools` `6c28c96` | **Tests:** 91 in 16 files `backoffice-tests/bots/ba --list`
 
 ---
 
@@ -10,35 +10,41 @@
 |---|---|---|---|
 | 1.0 | 28-08-2026 | QA Automation Kickstarter | Initial: probe 17 route, 91 tests, findings BA-001..006 |
 | 1.1 | 17-09-2026 | QA Automation Kickstarter | Detail lengkap per menu + flowchart + sesi validasi terpisah |
+| 1.2 | 17-09-2026 | QA Automation Kickstarter | Standar industri: tambah System Requirements, Install, Glossary, Roles, Safety, FAQ, Index |
 
 ---
 
 ## Daftar Isi
 
 1. [Overview](#1-overview)
-2. [Prasyarat](#2-prasyarat)
-3. [Akses & Login Flow](#3-akses--login-flow)
-4. [Struktur Menu](#4-struktur-menu)
-5. [Flowchart Umum](#5-flowchart-umum)
-6. [Detail Fitur per Menu](#6-detail-fitur-per-menu)
-   - 6.1 Dashboard
-   - 6.2 Bank
-   - 6.3 Billing Provider
-   - 6.4 Kategori & Grup
-   - 6.5 Menu
-   - 6.6 Mitra
-   - 6.7 Mitra Sub-menu (Top Up, Riwayat, Product Pricing, Credential)
-   - 6.8 Manage Product
-   - 6.9 Manage Role
-   - 6.10 Monitoring Transaksi
-   - 6.11 Rekap Transaksi
-   - 6.12 Rekonsiliasi
-   - 6.13 Invoice
-7. [Validasi & Negative Cases (Sesi Khusus)](#7-validasi--negative-cases-sesi-khusus)
-8. [Data Test & Cleanup](#8-data-test--cleanup)
-9. [Troubleshooting](#9-troubleshooting)
-10. [Catatan Temuan](#10-catatan-temuan)
-11. [Lampiran](#11-lampiran)
+2. [Prasyarat & System Requirements](#2-prasyarat--system-requirements)
+3. [Instalasi & Setup](#3-instalasi--setup)
+4. [Akses & Login Flow](#4-akses--login-flow)
+5. [Roles & Permissions](#5-roles--permissions)
+6. [Struktur Menu](#6-struktur-menu)
+7. [Flowchart Umum](#7-flowchart-umum)
+8. [Detail Fitur per Menu](#8-detail-fitur-per-menu)
+   - 8.1 Dashboard
+   - 8.2 Bank
+   - 8.3 Billing Provider
+   - 8.4 Kategori & Grup
+   - 8.5 Menu
+   - 8.6 Mitra
+   - 8.7 Mitra Sub-menu (Top Up, Riwayat, Product Pricing, Credential)
+   - 8.8 Manage Product
+   - 8.9 Manage Role
+   - 8.10 Monitoring Transaksi
+   - 8.11 Rekap Transaksi
+   - 8.12 Rekonsiliasi
+   - 8.13 Invoice
+9. [Validasi & Negative Cases (Sesi Khusus)](#9-validasi--negative-cases-sesi-khusus)
+10. [Glossary](#10-glossary)
+11. [Safety & Warnings](#11-safety--warnings)
+12. [FAQ](#12-faq)
+13. [Data Test & Cleanup](#13-data-test--cleanup)
+14. [Troubleshooting](#14-troubleshooting)
+15. [Catatan Temuan](#15-catatan-temuan)
+16. [Lampiran & Index](#16-lampiran--index)
 
 ---
 
@@ -46,15 +52,19 @@
 
 Biller Aggregator (BA) adalah BOT backoffice untuk mengelola mitra biller, produk, transaksi, dan keuangan. Webview `biller-dashboard-internal` diakses via popup `Masuk` dari portal setelah login OTP. Semua master mengikuti pola **Search dulu → Add/Edit/Delete + validasi + cleanup**.
 
+**Tujuan User Manual (ISO/IEC 26514:2022):** Memberikan instruksi lengkap instalasi, pengoperasian, dan pemeliharaan untuk end-user (Admin, Finance, Ops) dan QA.
+
 **Config:** `config/local.json` `backoffice_base_url: https://iconnet-portal-backoffice-playground.lentera-app.id` `config/index.ts`
 
 **Coverage:** 91 tests `backoffice-tests/bots/ba/*.spec.ts` — setiap master ada `validasi, add, edit, status, delete, duplikat`.
 
+**Audience:** Admin BA, QA, Dev, Finance Ops.
+
 ---
 
-## 2. Prasyarat
+## 2. Prasyarat & System Requirements
 
-| Item | Value | File |
+| Kategori | Requirement | Detail |
 |---|---|---|
 | Akun Portal | `subandonorogo@gmail.com` / `Password@123` | `shared/test-data/users.json:12` |
 | OTP Dummy | `000000` (6 digit) | `shared/test-data/backoffice.json:login.otp_dummy` |
@@ -62,10 +72,33 @@ Biller Aggregator (BA) adalah BOT backoffice untuk mengelola mitra biller, produ
 | Workers | `1` (portal menolak 2+ login OTP bersamaan) | `playwright.config.ts:25` |
 | Storage | `.auth/portal.json` via `setup` `storageState` | `playwright.config.ts:79` |
 | BaseUrl BA | `https://biller-dashboard-internal-playground.lentera-app.id` | `shared/pages/BaPage.ts:17` |
+| **OS** | Windows 10/11, macOS 13+, Linux Ubuntu 22.04+ | Browser Chrome 120+, Firefox 120+, WebKit 17+ |
+| **Browser** | Chrome/Edge 120+ (Playwright `Desktop Chrome`) | `devices['Desktop Chrome']` `playwright.config.ts:77` |
+| **Network** | 10 Mbps, port 443, akses `*.lentera-app.id` | Whitelist `iconnet-portal`, `biller-dashboard` |
+| **Resolusi** | 1366x768 min, `headless:false slowMo:1000` untuk demo | `playwright.config.ts:81` |
 
 ---
 
-## 3. Akses & Login Flow
+## 3. Instalasi & Setup
+
+```bash
+git clone https://github.com/rogo-s/Qa-Automation-Kickstarter.git
+cd Qa-Automation-Kickstarter
+npm install
+npx playwright install --with-deps chromium
+cp .env.example .env # set TEST_ENV=local
+npx playwright test --project=setup --headed # generate .auth/portal.json
+npx playwright test --project=backoffice --grep @smoke --headed
+npx tsx scripts/generate-pdf-report.ts # test-results/pdf/report-*.pdf
+```
+
+*Update `TEST_ENV=dev/staging` untuk `config/dev.json`.*
+
+---
+
+---
+
+## 4. Akses & Login Flow
 
 ```mermaid
 flowchart TD
@@ -85,7 +118,20 @@ flowchart TD
 
 ---
 
-## 4. Struktur Menu
+## 5. Roles & Permissions
+
+| Role | Akses Menu | Catatan |
+|---|---|---|
+| Super Admin | Semua `Master, Transaksi, Rekonsiliasi, Invoice, Dashboard` | Hapus Menu tetap 403 `BA-003` — perlu konfirmasi dev |
+| Admin Finance | `Invoice (Generate, Lunas)`, `Rekap, Rekonsiliasi` | Tidak ada `Manage Role` |
+| Ops | `Monitoring, Rekap` view only | `Tambah 0 view-only` untuk beberapa master |
+| Mitra | `Top Up, Riwayat` via `Mitra Sub-menu` | `BA-004 Mitra tidak punya Hapus` |
+
+*Permission matrix 115 checkbox di `Manage Role` `BaRolePage`.*
+
+---
+
+## 6. Struktur Menu
 
 Probe `a[href^="/"]` `biller-dashboard-internal` `17 route` (expand `Transaksi/Rekonsiliasi`):
 
@@ -111,7 +157,7 @@ Probe `a[href^="/"]` `biller-dashboard-internal` `17 route` (expand `Transaksi/R
 
 ---
 
-## 5. Flowchart Umum
+## 7. Flowchart Umum
 
 ### 5.1 Master CRUD (Bank, Billing Provider, Kategori, Menu, Role, Product)
 
@@ -159,9 +205,9 @@ flowchart TD
 
 ---
 
-## 6. Detail Fitur per Menu
+## 8. Detail Fitur per Menu
 
-### 6.1 Dashboard
+### 8.1 Dashboard
 
 * **Route:** `/dashboard_internal` `DashboardPage` `BaPage`
 * **Fungsi:** Menampilkan `Total Mitra 3, Biller 7, Product 71`, `Ringkasan Hari Ini` `Transaksi Berhasil`, `Distribusi Status/Produk`, `Top 5 Mitra/Product/Biller`
@@ -180,7 +226,7 @@ flowchart TD
     C --> D[Dropdown Harian → Bulanan]
 ```
 
-### 6.2 Bank
+### 8.2 Bank
 
 * **Route:** `/bank_internal` `BaBankPage` `heading Bank`
 * **Fungsi:** Mengelola master bank untuk settlement
@@ -207,20 +253,20 @@ flowchart TD
 | Delete | `Hapus → Lanjutkan` | `hasRow false` |
 | Duplikat | `code=TES existing` | `toast Kode sudah digunakan` |
 
-### 6.3 Billing Provider
+### 8.3 Billing Provider
 
 * **Route:** `/billing_provider_internal` `BaBillingProviderPage`
 * **Fungsi:** Mengelola provider biller
 * **Field:** `code, name, ...`
 * **Testcase:** sama Bank `validasi, add, edit, status, delete, duplikat`
 
-### 6.4 Kategori & Grup
+### 8.4 Kategori & Grup
 
 * **Route:** `/category_group_internal` `BaCategoryGroupPage`
 * **Fungsi:** Kategori `code, name` dan Grup `code, name, kategori`
 * **Testcase:** Kategori 6 tests + Grup 4 tests `validasi, add, edit, status, delete, duplikat` — duplikat `Kode Kategori sudah digunakan`
 
-### 6.5 Menu
+### 8.5 Menu
 
 * **Route:** `/menu_internal` `BaMenuPage`
 * **Fungsi:** Menu sidebar `code, name, icon, parent, description, status, permission`
@@ -244,7 +290,7 @@ flowchart TD
     D --> E[Hapus → 403 + row tetap ada]
 ```
 
-### 6.6 Mitra
+### 8.6 Mitra
 
 * **Route:** `/mitra_internal` `BaMitraPage`
 * **Fungsi:** Mitra biller
@@ -252,48 +298,48 @@ flowchart TD
 * **Keterangan:** `Tidak punya Hapus` `BA-004` — hanya `Aktifkan/Nonaktifkan`
 * **Duplikat:** `Kode sudah digunakan`
 
-### 6.7 Mitra Sub-menu
+### 8.7 Mitra Sub-menu
 
 * **Route:** `/mitra_internal/topup/<id>` `BaMitraSubMenuPage`
 * **Fungsi:** Top Up `validasi → Rp 50.000 → tabel`, Riwayat, Product Pricing `Generate`, Credential, Price dialog `Simpan disabled sampai form terisi`
 * **Input:** `Top Up Rp 50.000`, `Generate Product Pricing`
 
-### 6.8 Manage Product
+### 8.8 Manage Product
 
 * **Route:** `/manage_product_internal` `BaProductPage`
 * **Fungsi:** Produk biller
 * **Field:** `code, name, Biaya Admin/Komisi` `AdminFee, CommissionFee tidak boleh kosong` `BA` | `type BILLING → Harga disabled` `BA-006`
 * **Flow:** `validasi tanpa Biaya → error → add dengan Biaya → edit → status → delete → duplikat Kode produk sudah digunakan`
 
-### 6.9 Manage Role
+### 8.9 Manage Role
 
 * **Route:** `/manage_role_internal` `BaRolePage`
 * **Fungsi:** Role `code, name, permission matrix` `minimal memiliki satu akses menu` `BA-005` `500 Nama role sudah digunakan`
 * **Field:** `permission` checkbox `Dashboard/View` 115 checkbox
 
-### 6.10 Monitoring Transaksi
+### 8.10 Monitoring Transaksi
 
 * **Route:** `/monitoring_internal` `BaTransaksiPage`
 * **Fungsi:** Daftar transaksi `Search, Filter status Success, Export XLSX Tahun Ini`
 
-### 6.11 Rekap Transaksi
+### 8.11 Rekap Transaksi
 
 * **Route:** `/rekap_internal`
 * **Fungsi:** `Filter Tahun Ini, Export XLSX`
 
-### 6.12 Rekonsiliasi
+### 8.12 Rekonsiliasi
 
 * **Route:** `/rekonsiliasi_goto_internal`, `/rekonsiliasi_kudo_internal`, `/rekonsiliasi_e2pay_internal`, `/rekonsiliasi_ayoconnect_internal`
 * **Fungsi:** Tabel perbandingan `Upload Files`, `Search Cari File`
 
-### 6.13 Invoice
+### 8.13 Invoice
 
 * **Route:** `/invoice_internal` `BaInvoicePage`
 * **Fungsi:** `Generate` `mitra DIGI01, range bulan berjalan` → `invoice baru ATAU ditolak overlap`, `Konfirmasi Pembayaran: Belum Lunas → Lunas`, `Print`
 
 ---
 
-## 7. Validasi & Negative Cases (Sesi Khusus)
+## 9. Validasi & Negative Cases (Sesi Khusus)
 
 | No | Menu | Field | Input Invalid | Expected | Actual | Status | File |
 |---|---|---|---|---|---|---|---|
@@ -312,7 +358,47 @@ flowchart TD
 
 ---
 
-## 8. Data Test & Cleanup
+## 10. Glossary
+
+| Istilah | Definisi |
+|---|---|
+| Biller | Penyedia tagihan (PLN, PDAM, Telkom) yang di-aggregasi |
+| Mitra | Partner yang menjual produk biller ke end-user |
+| PSP | Payment Service Provider — mitra pembayaran |
+| Rekonsiliasi | Pencocokan transaksi BA vs Biller (Goto, Kudo, E2Pay, AyoConnect) |
+| Invoice | Tagihan mitra per periode, status Belum Lunas → Lunas |
+| Top Up | Penambahan saldo mitra `Rp 50.000` |
+| Product Pricing | Harga produk per mitra, Generate |
+| OTP | One-Time Password 6 digit `000000` dummy |
+| 403 | Forbidden — tidak punya izin hapus Menu |
+| XLSX | Excel export `export_data/` |
+
+---
+
+## 11. Safety & Warnings
+
+| Warning | Detail | Mitigasi |
+|---|---|---|
+| Hapus Menu 403 | `DELETE /api/v1/master/menu/delete` selalu 403 `BA-003` | Jangan hapus Menu di prod; hubungi dev |
+| Duplikat Kode | `Kode sudah digunakan` toast | Gunakan `QA*+uniq` `Date.now()` |
+| Rate Limit OTP | OTP `000000` dibatasi, jangan >3x salah | Test OTP salah max 1x `prepaid.spec.ts:2` |
+| Data Sampah | Semua `ADD` harus `delete` | `hasRow ? delete → hasRow false` |
+
+---
+
+## 12. FAQ
+
+| Q | A |
+|---|---|
+| Login gagal `Email atau password salah`? | Cek `subandonorogo@gmail.com` `shared/test-data/users.json` dan `TEST_ENV` |
+| Captcha tidak hilang? | Tunggu `skeleton` hidden `setup/auth.webview-nona.setup.ts:32` + `force click span` |
+| Search Bank selalu Tidak ada data? | `BA-001` known bug, pakai scan tabel tanpa filter |
+| Export XLSX dimana? | `backoffice-tests/bots/ba/export_data/` `BaTransaksiPage` |
+| PDF report dimana? | `test-results/pdf/report-*.pdf` `scripts/generate-pdf-report.ts` |
+
+---
+
+## 13. Data Test & Cleanup
 
 * **Uniq:** `Date.now().slice(-6)` `QA BANK <uniq>` `QAPSP` `QAUSER` `QAMITRA`
 * **Pola ADD:** `hasRow(code) ? skip add : openAdd → fill → save → hasRow true` `BaBankPage:hasRow`
@@ -321,7 +407,7 @@ flowchart TD
 
 ---
 
-## 9. Troubleshooting
+## 14. Troubleshooting
 
 | Issue | Detail | File |
 |---|---|---|
@@ -333,7 +419,7 @@ flowchart TD
 
 ---
 
-## 10. Catatan Temuan
+## 15. Catatan Temuan
 
 `shared/pdf/findings.ts` `BA-001..006, NONA-001..011`
 
@@ -348,7 +434,19 @@ flowchart TD
 
 ---
 
-## 11. Lampiran
+## 16. Lampiran & Index
+
+### 16.1 Index
+
+| Keyword | Halaman |
+|---|---|
+| Bank | 8.2 |
+| Invoice | 8.13 |
+| Login | 4 |
+| Mitra Top Up | 8.7 |
+| Role | 8.9 |
+
+### 16.2 Lampiran
 
 * **Jumlah Test:** `91 tests in 16 files` `npx playwright test backoffice-tests/bots/ba --list`
 * **File Spec:** `backoffice-tests/bots/ba/*.spec.ts` `bank 5, billing-provider 6, category-group 10, dashboard 4, entry 1, invoice 5, menu 6, mitra 5, mitra-submenu 9, monitoring 4, product 7, rekap 3, rekonsiliasi 5, role 5, topup`
@@ -357,6 +455,6 @@ flowchart TD
 
 ---
 
-## 12. Kontak
+## 17. Kontak
 
 QA Automation Kickstarter `subandonorogo@gmail.com` `https://github.com/rogo-s/Qa-Automation-Kickstarter` `branch backoffice-tools` `6c28c96`
